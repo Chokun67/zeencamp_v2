@@ -17,8 +17,10 @@ class CreateBill extends StatefulWidget {
 }
 
 class _CreateBillState extends State<CreateBill> {
+  final _ctrlSearch = TextEditingController();
   final String ip = AccountService().ipAddress;
   List<Store> storemenu = [];
+  List<Store> storemenu2 = [];
   List<bool> isCheckedList = [];
   List<TextEditingController> textControllers = [];
   var token = "";
@@ -52,6 +54,15 @@ class _CreateBillState extends State<CreateBill> {
     });
   }
 
+  void filterData(String query) {
+    setState(() {
+      storemenu2 = storemenu
+          .where((store) =>
+              store.nameMenu.toLowerCase().contains(query.toLowerCase()))
+          .toList();
+    });
+  }
+
   @override
   void dispose() {
     // คืนทรัพยากรของ Controllers เมื่อไม่ใช้งาน
@@ -75,7 +86,12 @@ class _CreateBillState extends State<CreateBill> {
             context,
             "สร้างบิล",
             true,
-            0.2),
+            0.25),
+        Positioned(
+            top: heightsize * 0.15,
+            child: SizedBox(
+                width: widthsize,
+                child: Center(child: fieldSearchType(widthsize, heightsize)))),
         listMenu(widthsize, heightsize),
         Positioned(
             bottom: 0,
@@ -83,17 +99,35 @@ class _CreateBillState extends State<CreateBill> {
               width: widthsize,
               height: heightsize * 0.05,
               color: Colors.amberAccent,
-              child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                textControllers.isNotEmpty
-                    ? Text(textControllers[1].text)
-                    : const Text(''),
-                ElevatedButton(onPressed: (){}, child: Text("สร้าง QR"))
-              ]), // แก้ไขด้วยการตรวจสอบขนาดของ textControllers),
+              child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    textControllers.isNotEmpty
+                        ? Text(textControllers[1].text)
+                        : const Text(''),
+                    ElevatedButton(onPressed: () {}, child: Text("สร้าง QR"))
+                  ]), // แก้ไขด้วยการตรวจสอบขนาดของ textControllers),
             ))
       ]))),
     );
   }
+
+  Widget fieldSearchType(widthsize, heightsize) => SizedBox(
+        width: widthsize * 0.8,
+        height: heightsize * 0.06,
+        child: TextField(
+          onChanged: (value) => filterData(value),
+          controller: _ctrlSearch,
+          decoration: InputDecoration(
+              border: OutlineInputBorder(
+                  borderSide:
+                      const BorderSide(color: Color(0xFFAD6800), width: 1),
+                  borderRadius: BorderRadius.circular(10)),
+              fillColor: const Color(0xFFFFFFFF),
+              filled: true,
+              hintText: "search"),
+        ),
+      );
 
   Widget listMenu(widthsize, heightsize) {
     return Padding(
@@ -101,10 +135,10 @@ class _CreateBillState extends State<CreateBill> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(height: heightsize * 0.1),
+          SizedBox(height: heightsize * 0.15),
           Container(
             padding: EdgeInsets.only(top: heightsize * 0.1),
-            height: heightsize * 0.8,
+            height: heightsize * 0.75,
             child: Column(
               children: [
                 Padding(
@@ -119,30 +153,34 @@ class _CreateBillState extends State<CreateBill> {
                 ),
                 Expanded(
                   child: ListView.builder(
-                    itemCount: storemenu.length,
+                    itemCount: _ctrlSearch.text.isEmpty
+                        ? storemenu.length
+                        : storemenu2.length,
                     itemBuilder: (context, index) {
+                      List<Store> displayList =
+                          _ctrlSearch.text.isEmpty ? storemenu : storemenu2;
+                      int originalIndex = storemenu.indexOf(displayList[index]);
                       return Padding(
                         padding: EdgeInsets.only(bottom: heightsize * 0.01),
                         child: Row(
                           children: [
                             Checkbox(
-                              value: isCheckedList[index], // สถานะเช็คบล็อก
+                              value: isCheckedList[
+                                  originalIndex], // สถานะเช็คบล็อก
                               onChanged: (bool? value) {
                                 setState(() {
-                                  isCheckedList[index] =
+                                  isCheckedList[originalIndex] =
                                       value ?? false; // อัปเดตสถานะเช็คบล็อก
+                                  textControllers[originalIndex].text = "";
                                 });
                               },
                             ),
-                            Container(
+                            SizedBox(
                               width: widthsize * 0.2,
                               height: heightsize * 0.1,
-                              color: isCheckedList[index]
-                                  ? Colors.green
-                                  : null, // สีของคอนเทนเนอร์
                               child: Center(
                                 child: Image.network(
-                                  'http://$ip:17003/api/v1/util/image/${storemenu[index].pictures}',
+                                  'http://$ip:17003/api/v1/util/image/${displayList[index].pictures}',
                                   fit: BoxFit.cover,
                                 ),
                               ),
@@ -150,12 +188,12 @@ class _CreateBillState extends State<CreateBill> {
                             Container(
                               width: widthsize * 0.25,
                               height: heightsize * 0.1,
-                              color: isCheckedList[index]
+                              color: isCheckedList[originalIndex]
                                   ? Colors.green
                                   : null, // สีของคอนเทนเนอร์
                               child: Center(
                                 child: Text(
-                                  storemenu[index].nameMenu,
+                                  displayList[index].nameMenu,
                                   style: const TextStyle(
                                     // สีของข้อความเมื่อเช็คบล็อกปิด
                                     fontSize: 25,
@@ -174,11 +212,12 @@ class _CreateBillState extends State<CreateBill> {
                               width: widthsize * 0.1,
                               height: heightsize * 0.03,
                               child: TextField(
+                                readOnly: !isCheckedList[originalIndex],
                                 decoration: const InputDecoration(
                                   hintText: '',
                                 ),
                                 controller: index < textControllers.length
-                                    ? textControllers[index]
+                                    ? textControllers[originalIndex]
                                     : null, // ตรวจสอบขนาดของ textControllers
                               ),
                             ),
