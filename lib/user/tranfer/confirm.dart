@@ -173,7 +173,7 @@ class _ConfirmTranferState extends State<ConfirmTranfer> {
         width: widthsize * 0.7,
         height: heightsize * 0.055,
         child: ElevatedButton(
-          onPressed: btnconfirmPage,
+          onPressed: () => Navigator.pop(context),
           style: ElevatedButton.styleFrom(
               backgroundColor: kGray4A,
               shape: const StadiumBorder(),
@@ -201,7 +201,7 @@ class _ConfirmTranferState extends State<ConfirmTranfer> {
                         builder: (context) => ReceiptPage(
                               idAccount: idAccount,
                               idname: idname,
-                              payee: value.payee,
+                              payee: widget.payee,
                               idpayee: widget.idpayee,
                               date: value.date,
                               point: value.point,

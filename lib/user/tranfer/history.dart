@@ -23,12 +23,12 @@ class _HistoryState extends State<History> {
   var idAccount = "";
   var idname = "";
 
-    @override
+  @override
   void initState() {
     super.initState();
     // token = context.read<AppData>().token;
     getData().then((_) {
-       AccountService().apigetpoint(token).then((value) => setState(() {
+      AccountService().apigetpoint(token).then((value) => setState(() {
             pointid = value.point;
             idAccount = value.id;
             idname = value.name;
@@ -57,29 +57,29 @@ class _HistoryState extends State<History> {
     return Scaffold(
       body: SafeArea(
           child: Stack(children: [
-                Mystlye().buildBackground(
+        Mystlye().buildBackground(
             widthsize, heightsize, context, "ประวัติ", true, 0.22),
-                Padding(
+        Padding(
           padding: EdgeInsets.all(widthsize * 0.03),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               SizedBox(height: heightsize * 0.15),
               Center(child: showPoint(widthsize, heightsize)),
-              SizedBox(height: heightsize*0.05),
+              SizedBox(height: heightsize * 0.05),
               SizedBox(
-                    width: widthsize,
-                    height: heightsize - heightsize * 0.5,
-                    child: historyPointTranfer(widthsize, heightsize, context))
+                  width: widthsize,
+                  height: heightsize - heightsize * 0.5,
+                  child: historyPointTranfer(widthsize, heightsize, context))
             ],
           ),
-                ),
-              ])),
+        ),
+      ])),
     );
   }
 
   Widget showPoint(widthsize, heightsize) => Container(
-        padding: EdgeInsets.all(widthsize * 0.05),
+        padding: EdgeInsets.all(widthsize * 0.04),
         width: widthsize * 0.8,
         height: heightsize * 0.127,
         decoration: const BoxDecoration(
@@ -135,15 +135,31 @@ class _HistoryState extends State<History> {
               history.sort((a, b) => b.date.compareTo(a.date));
               return InkWell(
                 onTap: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => DetailTranfer(
-                              idAccount: idAccount,
-                              state: history[index].state,
-                              payee: history[index].opposite,
-                              date: "${history[index].date}",
-                              point: history[index].point)));
+                  TranferService()
+                      .apiValidateTranfer(history[index].opposite, token)
+                      .then((value) => {
+                            if (value != null)
+                              {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => DetailTranfer(
+                                              idAccount: idAccount,
+                                              idname: idname,
+                                              state: history[index].state,
+                                              payee: history[index].opposite,
+                                              payeename: value.payee,
+                                              date: "${history[index].date}",
+                                              point: history[index].point,
+                                              balance: pointid,
+                                            )))
+                              }
+                            else
+                              {
+                                showAlertBox(context, 'แจ้งเตือน',
+                                    'ไม่สามารโหลดข้อมูลได้')
+                              },
+                          });
                 },
                 child: Container(
                   decoration: const BoxDecoration(

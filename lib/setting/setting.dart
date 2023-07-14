@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:zeencamp_v2/setting/tostore.dart';
-import 'package:zeencamp_v2/user/aboutshop/shopdetail.dart';
-
 import '../../background.dart/appstyle.dart';
 import '../../background.dart/background.dart';
 import '../Authentication/login.dart';
 import '../background.dart/securestorage.dart';
+import 'detailaccount.dart';
 
 class SettingPage extends StatefulWidget {
   const SettingPage({super.key});
@@ -15,6 +14,19 @@ class SettingPage extends StatefulWidget {
 }
 
 class _SettingState extends State<SettingPage> {
+  var isstore = "";
+  @override
+  void initState() {
+    super.initState();
+    getData().then((value) => setState(() {
+
+          }));
+  }
+
+  Future<void> getData() async {
+    isstore = await SecureStorage().read("isstore") as String;
+  }
+
   @override
   Widget build(BuildContext context) {
     final heightsize = MediaQuery.of(context).size.height;
@@ -40,7 +52,7 @@ class _SettingState extends State<SettingPage> {
                 height: heightsize * 0.5,
                 child: Column(children: [
                   detailAccount(widthsize, heightsize, context),
-                  tranferToShop(widthsize, heightsize, context),
+                  isstore=="false"?tranferToShop(widthsize, heightsize, context):Container(),
                   detailPolicy(widthsize, heightsize, context),
                   detailLogout(widthsize, heightsize, context)
                 ]),
@@ -52,34 +64,10 @@ class _SettingState extends State<SettingPage> {
     );
   }
 
-  Widget beta(double heightsize, double widthsize, BuildContext context) =>
-      SizedBox(
-        width: widthsize * 0.7,
-        height: heightsize * 0.055,
-        child: ElevatedButton(
-          onPressed: () {
-            Navigator.push(context,
-                MaterialPageRoute(builder: (context) => const ShopDetail()));
-          },
-          style: ElevatedButton.styleFrom(
-              backgroundColor: kYellow,
-              shape: const StadiumBorder(),
-              elevation: 5,
-              shadowColor: Colors.grey),
-          child: Text(
-            "ยืนยัน",
-            style: TextStyle(
-                color: kBlack,
-                fontWeight: FontWeight.bold,
-                fontSize: heightsize * 0.035),
-          ),
-        ),
-      );
-
   Widget detailAccount(widthsize, heightsize, context) => InkWell(
         onTap: () {
-          // Navigator.push(context,
-          //     MaterialPageRoute(builder: (context) => const DetailAccount()));
+          Navigator.push(context,
+              MaterialPageRoute(builder: (context) => const DetailAccount()));
         },
         child: Container(
           padding: EdgeInsets.only(left: widthsize * 0.1),

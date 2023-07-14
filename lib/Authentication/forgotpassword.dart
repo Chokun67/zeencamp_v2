@@ -3,7 +3,6 @@ import 'package:intl/intl.dart';
 import '../application/accountService/accountservice.dart';
 import '../background.dart/appstyle.dart';
 import '../background.dart/background.dart';
-import '../shop/menushop.dart';
 
 class ForgotPassword extends StatefulWidget {
   const ForgotPassword({super.key});
@@ -15,6 +14,7 @@ class ForgotPassword extends StatefulWidget {
 class _ForgotPasswordState extends State<ForgotPassword> {
   bool obscureText1 = true;
   final _ctrlLogin = TextEditingController();
+  final _ctrldatetime = TextEditingController();
   final _ctrlnewPswd = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   DateTime selectedDate = DateTime.now();
@@ -24,61 +24,58 @@ class _ForgotPasswordState extends State<ForgotPassword> {
     final widthsize = MediaQuery.of(context).size.width;
     return Scaffold(
       body: SafeArea(
-          child: Stack(
-            children: [
-              Container(
-                padding: EdgeInsets.all(widthsize * 0.08),
-                height: heightsize- MediaQuery.of(context).padding.vertical,
-                width: widthsize,
-                color: kGrayD9,
-                child: SingleChildScrollView(
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SizedBox(
-                            height: heightsize * 0.122,
-                            width: widthsize * 0.62,
-                            child: Image.asset(
-                              'images/beeicon.png',
-                              fit: BoxFit.cover,
-                            )),
-                        SizedBox(height: heightsize * 0.01),
-                        textDescribe(heightsize, widthsize),
-                        SizedBox(height: heightsize * 0.02),
-                        textfieldUser(heightsize),
-                        SizedBox(height: heightsize * 0.02),
-                        textfieldbirthday(heightsize, widthsize),
-                        SizedBox(height: heightsize * 0.02),
-                        textfieldpswd(heightsize, widthsize),
-                        SizedBox(height: heightsize * 0.08),
-                        Center(child: forgotButton(heightsize, widthsize, context)),
-                        SizedBox(height: heightsize * 0.12)
-                      ],
-                    ),
-                  ),
+          child: SingleChildScrollView(
+        child: Stack(
+          children: [
+            Container(
+              padding: EdgeInsets.all(widthsize * 0.08),
+              height: heightsize - MediaQuery.of(context).padding.vertical,
+              width: widthsize,
+              color: kWhite,
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(
+                        height: heightsize * 0.122,
+                        width: widthsize * 0.62,
+                        child: Image.asset(
+                          'images/beeicon.png',
+                          fit: BoxFit.cover,
+                        )),
+                    SizedBox(height: heightsize * 0.01),
+                    textDescribe(heightsize, widthsize),
+                    SizedBox(height: heightsize * 0.02),
+                    textfieldUser(heightsize),
+                    SizedBox(height: heightsize * 0.02),
+                    textfieldbirthday(heightsize, widthsize),
+                    SizedBox(height: heightsize * 0.02),
+                    textfieldpswd(heightsize, widthsize),
+                    SizedBox(height: heightsize * 0.08),
+                    Center(child: forgotButton(heightsize, widthsize, context)),
+                    SizedBox(height: heightsize * 0.12)
+                  ],
                 ),
               ),
+            ),
             Positioned(
-            child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.end,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              goLogin(heightsize, widthsize, context),
-              SizedBox(height: heightsize*0.05,),
-            ],
-          ),
-        ))],
-          )),
+                bottom: 0,
+                child: SizedBox(
+                  width: widthsize,
+                  height: heightsize * 0.15,
+                  child: Center(child: goLogin(heightsize, widthsize, context)),
+                )),
+          ],
+        ),
+      )),
     );
   }
 
   Widget textDescribe(heightsize, widthsize) => Row(
-    mainAxisAlignment: MainAxisAlignment.start,
-    children: [
-      Padding(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Padding(
             padding: EdgeInsets.only(left: widthsize * 0.02),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -113,66 +110,76 @@ class _ForgotPasswordState extends State<ForgotPassword> {
               ],
             ),
           ),
-    ],
-  );
+        ],
+      );
 
   Widget textfieldUser(heightsize) => TextFormField(
-    validator: (value) {
-      if (value!.isEmpty) {
-        return 'กรุณากรอกค่า';
-      } 
-      return null;
-    },
-    controller: _ctrlLogin,
-    keyboardType: TextInputType.emailAddress,
-    style: TextStyle(fontSize: heightsize * 0.02),
-    decoration: InputDecoration(
-      border: const OutlineInputBorder(
-          borderRadius: BorderRadius.all(Radius.circular(15))),
-      contentPadding: EdgeInsets.symmetric(vertical: heightsize * 0.008),
-      fillColor: kWhite,
-      filled: true,
-      hintText: "Email",
-      prefixIcon: const Icon(Icons.email_outlined),
-    ),
-  );
+        validator: (value) {
+          if (value!.isEmpty) {
+            return 'กรุณากรอกค่า';
+          }
+          return null;
+        },
+        controller: _ctrlLogin,
+        keyboardType: TextInputType.emailAddress,
+        style: TextStyle(fontSize: heightsize * 0.02),
+        decoration: InputDecoration(
+          border: const OutlineInputBorder(
+              borderRadius: BorderRadius.all(Radius.circular(15))),
+          contentPadding: EdgeInsets.symmetric(vertical: heightsize * 0.008),
+          fillColor: kGrayD9,
+          filled: true,
+          hintText: "อีเมล",
+          prefixIcon: const Icon(Icons.email_outlined),
+        ),
+      );
 
-  bool havedatetime = true;
   Widget textfieldbirthday(heightsize, widthsize) => TextFormField(
-    validator: (value) {
-    if (havedatetime = true) {
-      return 'กรุณากรอกค่า';
-    } 
-    return null;
-  },
-    readOnly: true,
-    style: TextStyle(fontSize: heightsize * 0.02),
-    decoration: InputDecoration(
-        border: const OutlineInputBorder(
-            borderRadius: BorderRadius.all(Radius.circular(15))),
+        controller: _ctrldatetime,
+        validator: (value) {
+          if (value!.isEmpty) {
+            return 'กรุณากรอกค่า';
+          }
+          return null;
+        },
+        readOnly: true,
+        style: TextStyle(fontSize: heightsize * 0.02),
+        decoration: InputDecoration(
+            border: const OutlineInputBorder(
+                borderRadius: BorderRadius.all(Radius.circular(15))),
             contentPadding: EdgeInsets.symmetric(vertical: heightsize * 0.008),
-        fillColor: kWhite,
-        filled: true,
-        hintText: havedatetime
-            ? "Birthday"
-            : "${selectedDate.day}/${selectedDate.month}/${selectedDate.year}",
-        prefixIcon: const Icon(Icons.cake_outlined),
-        suffixIcon: InkWell(
-            onTap: () async {
-              final DateTime? dateTime = await showDatePicker(
-                  context: context,
-                  initialDate: selectedDate,
-                  firstDate: DateTime(1940),
-                  lastDate: DateTime.now());
-              if (dateTime != null) {
-                setState(() {
-                  selectedDate = dateTime;
-                  havedatetime = false;
-                });
-              }
-            },
-            child: Icon(Icons.arrow_drop_down, size: widthsize * 0.1))),
-  );
+            fillColor: kGrayD9,
+            filled: true,
+            hintText: "วันเกิด",
+            prefixIcon: const Icon(Icons.cake_outlined),
+            suffixIcon: InkWell(
+                onTap: () async {
+                  final DateTime? dateTime = await showDatePicker(
+                      context: context,
+                      initialDate: selectedDate,
+                      firstDate: DateTime(1940),
+                      lastDate: DateTime.now(),
+                      builder: (BuildContext context, Widget? child) {
+                        return Theme(
+                          data: ThemeData.light().copyWith(
+                            colorScheme: const ColorScheme.light().copyWith(
+                              primary: kDarkYellow, // กำหนดสีหัวข้อที่ต้องการ
+                            ),
+                          ),
+                          child: child ?? const SizedBox(),
+                        );
+                      });
+
+                  if (dateTime != null) {
+                    setState(() {
+                      selectedDate = dateTime;
+                      _ctrldatetime.text =
+                          "${selectedDate.day}/${selectedDate.month}/${selectedDate.year}";
+                    });
+                  }
+                },
+                child: Icon(Icons.arrow_drop_down, size: widthsize * 0.1))),
+      );
 
   Widget textfieldpswd(heightsize, widthsize) => TextFormField(
         obscureText: obscureText1,
@@ -192,9 +199,9 @@ class _ForgotPasswordState extends State<ForgotPassword> {
             border: const OutlineInputBorder(
                 borderRadius: BorderRadius.all(Radius.circular(15))),
             contentPadding: EdgeInsets.symmetric(vertical: heightsize * 0.008),
-            fillColor: kWhite,
+            fillColor: kGrayD9,
             filled: true,
-            hintText: "New Password",
+            hintText: "รหัสผ่านใหม่",
             prefixIcon: const Icon(Icons.lock_outline),
             suffixIcon: GestureDetector(
                 onTap: () {
@@ -214,43 +221,36 @@ class _ForgotPasswordState extends State<ForgotPassword> {
         child: ElevatedButton(
           onPressed: btnpassword,
           style: ElevatedButton.styleFrom(
-              backgroundColor: kYellow,
-              shape: const StadiumBorder(),
-              elevation: 5,
-              shadowColor: Colors.grey),
+              backgroundColor: kYellow, shape: const StadiumBorder()),
           child: const Text(
-            "Change Password",
+            "เปลี่ยนรหัสผ่าน",
             style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
           ),
         ),
       );
 
-    void btnpassword() {
-    // if (_formKey.currentState!.validate()) {
-    //   AccountService()
-    //       .forgotpassword(_ctrlLogin.text,
-    //           DateFormat('yyyy-MM-dd').format(selectedDate), _ctrlnewPswd.text)
-    //       .then((value) => {
-    //             if (value.code == 200)
-    //               {
-    //                 Navigator.pop(context),
-    //                 showAlertBox(context, "แจ้งเตือน", "เปลี่ยนรหัสผ่านสำเร็จ"),
-    //               }
-    //             else
-    //               {showAlertBox(context, "แจ้งเตือน", "ตรวจสอบความถูกต้อง")}
-    //           });
-    Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const MenuShop()),
-                        );
-    
+  void btnpassword() {
+    if (_formKey.currentState!.validate()) {
+      AccountService()
+          .forgotpassword(_ctrlLogin.text,
+              DateFormat('yyyy-MM-dd').format(selectedDate), _ctrlnewPswd.text)
+          .then((value) => {
+                if (value.code == 200)
+                  {
+                    Navigator.pop(context),
+                    showAlertBox(context, "แจ้งเตือน", "เปลี่ยนรหัสผ่านสำเร็จ"),
+                  }
+                else
+                  {showAlertBox(context, "แจ้งเตือน", "ตรวจสอบความถูกต้อง")}
+              });
+    }
   }
 
   Widget goLogin(double heightsize, double widthsize, BuildContext context) =>
       Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text("Already have an account?",
+          Text("จำได้แล้ว?",
               style: TextStyle(
                 color: kBlack,
                 fontSize: heightsize * 0.02,
@@ -258,7 +258,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
           TextButton(
               onPressed: () => Navigator.pop(context),
               child: Text(
-                "Login",
+                "เข้าสู่ระบบ",
                 style: TextStyle(
                     color: kDarkYellow,
                     fontSize: heightsize * 0.02,

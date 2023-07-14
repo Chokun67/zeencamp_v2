@@ -1,7 +1,10 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
+import 'package:zeencamp_v2/background.dart/appstyle.dart';
 
+import '../../application/tranferService/tranferservice.dart';
+import '../../background.dart/securestorage.dart';
+import '../aboutshop/getpoint.dart';
 import '../tranfer/qrtranfer.dart';
 
 class QrScaner extends StatefulWidget {
@@ -15,17 +18,28 @@ class _QrScanerState extends State<QrScaner> {
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
   QRViewController? controller;
   String qrText = "";
-  int testint = 0;
-  String teststring = "";
-  late Map<String, dynamic> toTranfer = {};
   bool isScanned = false;
+  String token = "";
+  String idAccount = "";
+
+  @override
+  void initState() {
+    super.initState();
+    getData();
+  }
+
+  Future<void> getData() async {
+    token = await SecureStorage().read("token") as String;
+    idAccount = await SecureStorage().read("idAccount") as String;
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('QR จ่ายเงิน'),backgroundColor: const Color(0xFF4A4A4A),foregroundColor: 
-        const Color(0xFFFFD600),
+        title: const Text('QR จ่ายเงิน'),
+        backgroundColor: kYellow,
+        foregroundColor: kGray4A,
       ),
       body: Stack(
         children: [
@@ -89,27 +103,39 @@ class _QrScanerState extends State<QrScaner> {
       if (!isScanned) {
         setState(() {
           qrText = scanData.code!;
-          try {
-            toTranfer = jsonDecode(qrText);
-            if (toTranfer['point'] is! int || toTranfer['idstore'] is! String) {
-              isScanned = true;
-              _showErrorDialog('Invalid data types in QR Code');
-              return;
-            }            
-          } catch (e) {
-            isScanned = true;
-            _showErrorDialog('Invalid data types in QR Code');
-            return;
-          }
           isScanned = true;
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => QrTranFer(
-                idstore: toTranfer['idstore']!,
-              ),
-            ),
-          );
+          TranferService().apiValidateTranfer(qrText, token).then((value) => {
+                if (value != null)
+                  {
+                    print("wtf 1"),
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => QrTranFer(idstore: qrText)))
+                            ,isScanned = false
+                  }
+                else
+                  {
+                    TranferService()
+                        .validateMenuForMenu(token, qrText)
+                        .then((value) => {
+                              if (value != null)
+                                {
+                                  _showErrorDialog("QR ใช้งานได้"),
+                                  Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => GetPoint(
+                                              hash: qrText,
+                                              menuList: value.menuStores,
+                                              amount: value.amount)))
+                                  
+                                }
+                              else
+                                {_showErrorDialog("รูปแบบ QR ไม่ถูกต้อง")}
+                            })
+                  },
+              });
         });
       }
     });

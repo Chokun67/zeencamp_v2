@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
-
-import 'package:zeencamp_v2/user/aboutshop/shopdetail.dart';
-
-import '../../background.dart/appstyle.dart';
-import '../../background.dart/background.dart';
-import '../application/accountService/accountservice.dart';
-import '../application/shopService/shopservice.dart';
-import '../background.dart/securestorage.dart';
-import '../domain/dmstore/detailshopdm.dart';
+import 'package:flutter/services.dart';
+import 'package:zeencamp_v2/application/tranferService/tranferservice.dart';
+import 'package:zeencamp_v2/background.dart/appstyle.dart';
+import 'package:zeencamp_v2/shop/tranferbill/qrbill.dart';
+import '../../../background.dart/background.dart';
+import '../../application/accountService/accountservice.dart';
+import '../../application/shopService/shopservice.dart';
+import '../../background.dart/securestorage.dart';
+import '../../domain/dmstore/detailshopdm.dart';
 
 class CreateBill extends StatefulWidget {
-  const CreateBill({super.key});
+  const CreateBill({Key? key, required this.isReceive}) : super(key: key);
+  final bool isReceive;
 
   @override
   State<CreateBill> createState() => _CreateBillState();
@@ -21,8 +22,13 @@ class _CreateBillState extends State<CreateBill> {
   final String ip = AccountService().ipAddress;
   List<Store> storemenu = [];
   List<Store> storemenu2 = [];
+  List<Store> sendmenu = [];
+  List<int> amountmenu = [];
   List<bool> isCheckedList = [];
   List<TextEditingController> textControllers = [];
+  Map<String, int> qrMap = {};
+
+  bool hasError = false;
   var token = "";
   var idAccount = "";
 
@@ -84,7 +90,7 @@ class _CreateBillState extends State<CreateBill> {
             widthsize,
             heightsize - MediaQuery.of(context).padding.vertical,
             context,
-            "สร้างบิล",
+            widget.isReceive ? "สร้างบิลให้พอยท์" : "สร้างบิลรับพอยท์",
             true,
             0.25),
         Positioned(
@@ -103,9 +109,56 @@ class _CreateBillState extends State<CreateBill> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     textControllers.isNotEmpty
-                        ? Text(textControllers[1].text)
+                        ? Text(textControllers[0].text)
                         : const Text(''),
-                    ElevatedButton(onPressed: () {}, child: Text("สร้าง QR"))
+                    ElevatedButton(
+                        onPressed: () {
+                          for (int i = 0; i < isCheckedList.length; i++) {
+                            if (isCheckedList[i]) {
+                              String key = storemenu[i].id;
+                              int value;
+                              try {
+                                value = int.parse(textControllers[i].text);
+                                sendmenu.add(storemenu[i]);
+                                amountmenu.add(value);
+                                if (value < 1) {
+                                  hasError = true;
+                                  break;
+                                }
+                              } catch (e) {
+                                hasError = true;
+                                showAlertBox(
+                                    context, "test", "กรุณากรอกตัวเลข");
+                                break;
+                              }
+                              qrMap[key] = value;
+                            }
+                          }
+                          if (!hasError) {
+                            showAlertBox(context, "test", "$qrMap");
+
+                            TranferService()
+                                .buildqrcodeformenu(
+                                    token, qrMap, widget.isReceive)
+                                .then((value) => {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) => QrBill(
+                                                hash: value!,
+                                                amountmenu: amountmenu,
+                                                menusend: sendmenu,
+                                                isReceive: widget.isReceive)),
+                                      ).then((value) =>
+                                          {sendmenu = [], amountmenu = []})
+                                    });
+
+                            hasError = false;
+                          } else {
+                            hasError = false;
+                          }
+                        },
+                        child: const Text("สร้าง QR"))
                   ]), // แก้ไขด้วยการตรวจสอบขนาดของ textControllers),
             ))
       ]))),
@@ -125,7 +178,8 @@ class _CreateBillState extends State<CreateBill> {
                   borderRadius: BorderRadius.circular(10)),
               fillColor: const Color(0xFFFFFFFF),
               filled: true,
-              hintText: "search"),
+              prefixIcon: const Icon(Icons.search),
+              hintText: "ค้นหา",hintStyle: mystyleText(heightsize, 0.02, kGray4A, false)),
         ),
       );
 
@@ -146,9 +200,14 @@ class _CreateBillState extends State<CreateBill> {
                       left: widthsize * 0.02,
                       right: widthsize * 0.05,
                       bottom: heightsize * 0.01),
-                  child: const Row(
+                  child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [Text("เลือกรายการ"), Text("จำนวน")],
+                    children: [
+                      Text("เลือกรายการ",
+                          style: mystyleText(heightsize, 0.03, kGray4A, false)),
+                      Text("จำนวน",
+                          style: mystyleText(heightsize, 0.03, kGray4A, false))
+                    ],
                   ),
                 ),
                 Expanded(
@@ -186,6 +245,7 @@ class _CreateBillState extends State<CreateBill> {
                               ),
                             ),
                             Container(
+                              margin: EdgeInsets.only(left: widthsize * 0.02),
                               width: widthsize * 0.25,
                               height: heightsize * 0.1,
                               color: isCheckedList[originalIndex]
@@ -194,16 +254,25 @@ class _CreateBillState extends State<CreateBill> {
                               child: Center(
                                 child: Text(
                                   displayList[index].nameMenu,
-                                  style: const TextStyle(
-                                    // สีของข้อความเมื่อเช็คบล็อกปิด
-                                    fontSize: 25,
+                                  style: TextStyle(
+                                    fontSize: heightsize * 0.02,
                                   ),
                                 ),
                               ),
                             ),
                             IconButton(
                               onPressed: () {
-                                // โค้ดที่จะทำเมื่อกดปุ่มเล็กที่เรียงลำดับ
+                                if (isCheckedList[originalIndex]) {
+                                  int currentValue = int.tryParse(
+                                          textControllers[originalIndex]
+                                              .text) ??
+                                      0;
+                                  int decrementedValue = currentValue - 1;
+                                  if (decrementedValue >= 0) {
+                                    textControllers[originalIndex].text =
+                                        decrementedValue.toString();
+                                  }
+                                }
                               },
                               icon: Icon(Icons.arrow_downward,
                                   size: heightsize * 0.03),
@@ -212,18 +281,29 @@ class _CreateBillState extends State<CreateBill> {
                               width: widthsize * 0.1,
                               height: heightsize * 0.03,
                               child: TextField(
-                                readOnly: !isCheckedList[originalIndex],
-                                decoration: const InputDecoration(
-                                  hintText: '',
-                                ),
-                                controller: index < textControllers.length
-                                    ? textControllers[originalIndex]
-                                    : null, // ตรวจสอบขนาดของ textControllers
-                              ),
+                                  inputFormatters: [
+                                    FilteringTextInputFormatter
+                                        .digitsOnly, // จำกัดให้เป็นตัวเลขเท่านั้น
+                                  ],
+                                  readOnly: !isCheckedList[originalIndex],
+                                  decoration: const InputDecoration(
+                                    hintText: '',
+                                  ),
+                                  controller: textControllers[
+                                      originalIndex] // ตรวจสอบขนาดของ textControllers
+                                  ),
                             ),
                             IconButton(
                               onPressed: () {
-                                // โค้ดที่จะทำเมื่อกดปุ่มเล็กที่เรียงลำดับ
+                                if (isCheckedList[originalIndex]) {
+                                  int currentValue = int.tryParse(
+                                          textControllers[originalIndex]
+                                              .text) ??
+                                      0;
+                                  int incrementedValue = currentValue + 1;
+                                  textControllers[originalIndex].text =
+                                      incrementedValue.toString();
+                                }
                               },
                               icon: Icon(Icons.arrow_upward,
                                   size: heightsize * 0.03),
@@ -241,120 +321,4 @@ class _CreateBillState extends State<CreateBill> {
       ),
     );
   }
-
-  Widget beta(double heightsize, double widthsize, BuildContext context) =>
-      SizedBox(
-        width: widthsize * 0.7,
-        height: heightsize * 0.055,
-        child: ElevatedButton(
-          onPressed: () {
-            Navigator.push(context,
-                MaterialPageRoute(builder: (context) => const ShopDetail()));
-          },
-          style: ElevatedButton.styleFrom(
-              backgroundColor: kYellow,
-              shape: const StadiumBorder(),
-              elevation: 5,
-              shadowColor: Colors.grey),
-          child: Text(
-            "ยืนยัน",
-            style: TextStyle(
-                color: kBlack,
-                fontWeight: FontWeight.bold,
-                fontSize: heightsize * 0.035),
-          ),
-        ),
-      );
-
-  // Widget listMenu(widthsize, heightsize, List<Store>? menuStores) {
-  //   return Padding(
-  //     padding: EdgeInsets.all(widthsize * 0.03),
-  //     child: Column(
-  //       crossAxisAlignment: CrossAxisAlignment.start,
-  //       children: [
-  //         SizedBox(height: heightsize * 0.1),
-  //         Container(
-  //           padding: EdgeInsets.only(top: heightsize * 0.1),
-  //           height: heightsize * 0.8,
-  //           child: Column(
-  //             children: [
-  //               Padding(
-  //                 padding: EdgeInsets.only(
-  //                     left: widthsize * 0.02, right: widthsize * 0.05),
-  //                 child: const Row(
-  //                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  //                   children: [Text("เลือกรายการ"), Text("จำนวน")],
-  //                 ),
-  //               ),
-  //               Expanded(
-  //                 child: ListView.builder(
-  //                   itemCount: menuStores?.length,
-  //                   itemBuilder: (context, index) {
-  //                     final menuStore = menuStores?[index];
-  //                     return Row(
-  //                       children: [
-  //                         Checkbox(
-  //                           value: isCheckedList[index], // สถานะเช็คบล็อก
-  //                           onChanged: (bool? value) {
-  //                             setState(() {
-  //                               isCheckedList[index] =
-  //                                   value ?? false; // อัปเดตสถานะเช็คบล็อก
-  //                             });
-  //                           },
-  //                         ),
-  //                         Container(
-  //                           width: widthsize * 0.3,
-  //                           height: heightsize * 0.1,
-  //                           color: isCheckedList[index]
-  //                               ? Colors.green
-  //                               : null, // สีของคอนเทนเนอร์
-  //                           child: Center(
-  //                             child: Text(
-  //                               "${menuStore?.nameMenu}",
-  //                               style: TextStyle(
-  //                                 color: isCheckedList[index]
-  //                                     ? Colors
-  //                                         .white // สีของข้อความเมื่อเช็คบล็อกเปิด
-  //                                     : Colors
-  //                                         .black, // สีของข้อความเมื่อเช็คบล็อกปิด
-  //                                 fontSize: 16,
-  //                               ),
-  //                             ),
-  //                           ),
-  //                         ),
-  //                         IconButton(
-  //                           onPressed: () {
-  //                             // โค้ดที่จะทำเมื่อกดปุ่มเล็กที่เรียงลำดับ
-  //                           },
-  //                           icon: Icon(Icons.arrow_upward,
-  //                               size: heightsize * 0.03),
-  //                         ),
-  //                         SizedBox(
-  //                           width: widthsize * 0.15,
-  //                           height: heightsize * 0.03,
-  //                           child: TextField(
-  //                               decoration: const InputDecoration(
-  //                                 hintText: '',
-  //                               ),
-  //                               controller: textControllers[index]),
-  //                         ),
-  //                         IconButton(
-  //                           onPressed: () {
-  //                             // โค้ดที่จะทำเมื่อกดปุ่มเล็กที่เรียงลำดับ
-  //                           },
-  //                           icon: Icon(Icons.arrow_downward,
-  //                               size: heightsize * 0.03),
-  //                         ),
-  //                       ],
-  //                     );
-  //                   },
-  //                 ),
-  //               ),
-  //             ],
-  //           ),
-  //         )
-  //       ],
-  //     ),
-  //   );
-  // }
 }

@@ -1,20 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:zeencamp_v2/background.dart/appstyle.dart';
 import 'qrreceive.dart';
 import 'qrscaner.dart';
 
 class QrMenu extends StatefulWidget {
-  const QrMenu({super.key});
+  const QrMenu({Key? key, required this.idAccount}) : super(key: key);
+  final String idAccount;
 
   @override
   State<QrMenu> createState() => _QrMenuState();
 }
 
 class _QrMenuState extends State<QrMenu> {
-  var pages = <Widget>[const QrScaner(), const QrReceive()];
-    int _navItemIndex = 0;
+      int _navItemIndex = 0;
   @override
   Widget build(BuildContext context) {
-     var heightsize = MediaQuery.of(context).size.height;
+    var pages = <Widget>[const QrScaner(), QrReceive(idshop: widget.idAccount)];
+    var heightsize = MediaQuery.of(context).size.height;
     return Scaffold(
       body: pages[_navItemIndex],
       bottomNavigationBar: BottomNavigationBar(
@@ -22,8 +24,8 @@ class _QrMenuState extends State<QrMenu> {
         unselectedFontSize: heightsize * 0.025,
         selectedFontSize: heightsize * 0.025,
         iconSize: heightsize * 0.04,
-        backgroundColor: const Color(0xFF4A4A4A),
-        unselectedItemColor: const Color(0xFFFFD600),
+        backgroundColor: kWhite,
+        unselectedItemColor: kGray4A,
         selectedItemColor: const Color(0xFFFF9900),
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.qr_code_scanner_sharp), label: 'สแกน QR'),

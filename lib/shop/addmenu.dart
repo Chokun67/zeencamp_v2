@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:zeencamp_v2/application/accountService/accountservice.dart';
 import 'package:zeencamp_v2/background.dart/background.dart';
@@ -7,7 +8,6 @@ import 'package:zeencamp_v2/background.dart/background.dart';
 import '../application/shopService/shopservice.dart';
 import '../background.dart/appstyle.dart';
 import '../background.dart/securestorage.dart';
-
 
 class AddMenuItem extends StatefulWidget {
   const AddMenuItem({super.key});
@@ -72,10 +72,10 @@ class _AddMenuItemState extends State<AddMenuItem> {
         child: SafeArea(
           child: Stack(
             children: [
-              Mystlye().buildBackground(widthsize, heightsize, context, "เพิ่มเมนู", true, 0.3),
+              Mystlye().buildBackground(
+                  widthsize, heightsize, context, "เพิ่มเมนู", true, 0.3),
               Column(
                 children: [
-                  titleSetting(widthsize, heightsize),
                   deTail(widthsize, heightsize, context),
                 ],
               )
@@ -86,16 +86,9 @@ class _AddMenuItemState extends State<AddMenuItem> {
     );
   }
 
-  Widget titleSetting(widthsize, heightsize) => SizedBox(
-        height: heightsize * 0.175,
-        child: Center(
-          child: Text("เพิ่มเมนู", style: mystyleText(heightsize, 0.02, kBlack, true)),
-        ),
-      );
 
   Widget deTail(widthsize, heightsize, context) => Container(
-        padding: EdgeInsets.only(top: heightsize * 0.01),
-        height: heightsize * 0.8,
+        padding: EdgeInsets.only(top: heightsize * 0.18),
         child: Form(
           key: _formKey,
           child:
@@ -114,92 +107,104 @@ class _AddMenuItemState extends State<AddMenuItem> {
             radiobutton(heightsize, widthsize),
             SizedBox(height: heightsize * 0.02),
             btnAddMenuItem(heightsize, widthsize),
+            SizedBox(height: heightsize * 0.02),
           ]),
         ),
       );
 
   Widget textfieldName(heightsize, widthsize) => SizedBox(
-        width: widthsize * 0.72,
-        height: heightsize * 0.06,
-        child: TextFormField(
-          style: TextStyle(fontSize: heightsize * 0.02),
-          controller: _ctrlname,
-          validator: (value) {
-            if (value!.isEmpty) {
-              return 'กรุณากรอกค่า';
-            }
-            return null;
-          },
-          decoration: const InputDecoration(
-            hintText: "name : ",
-            fillColor: Color(0xFFA6A6A6),
-            filled: true,
-          ),
-        ),
-      );
+    width: widthsize*0.75,
+    child: TextFormField(
+      style: TextStyle(fontSize: heightsize * 0.02),
+      controller: _ctrlname,
+      validator: (value) {
+        if (value!.isEmpty) {
+          return 'กรุณากรอกค่า';
+        }
+        return null;
+      },
+      decoration: InputDecoration(
+        hintText: "name : ",
+        fillColor: kGray75,
+        filled: true,
+        contentPadding: EdgeInsets.symmetric(vertical: heightsize * 0.008),
+      ),
+    ),
+  );
 
   Widget textfieldprice(heightsize, widthsize) => SizedBox(
-        width: widthsize * 0.72,
-        height: heightsize * 0.06,
-        child: TextFormField(
-          keyboardType: TextInputType.number,
-          style: TextStyle(fontSize: heightsize * 0.02),
-          controller: _ctrlprice,
-          validator: (value) {
-            if (value!.isEmpty) {
-              return 'กรุณากรอกค่า';
-            }
-            return null;
-          },
-          decoration: const InputDecoration(
-            hintText: "price : ",
-            fillColor: Color(0xFFA6A6A6),
-            filled: true,
-          ),
-        ),
-      );
+    width: widthsize*0.75,
+    child: TextFormField(
+      inputFormatters: [
+        FilteringTextInputFormatter.allow(RegExp(r'^\d+')),
+        FilteringTextInputFormatter.digitsOnly,
+      ],
+      keyboardType: TextInputType.number,
+      style: TextStyle(fontSize: heightsize * 0.02),
+      controller: _ctrlprice,
+      validator: (value) {
+        if (value!.isEmpty) {
+          return 'กรุณากรอกค่า';
+        }
+        return null;
+      },
+      decoration: InputDecoration(
+        hintText: "price : ",
+        fillColor: kGray75,
+        filled: true,
+        contentPadding: EdgeInsets.symmetric(vertical: heightsize * 0.008),
+      ),
+    ),
+  );
 
   Widget textfieldexchange(heightsize, widthsize) => SizedBox(
-        width: widthsize * 0.72,
-        height: heightsize * 0.06,
-        child: TextFormField(
-          keyboardType: TextInputType.number,
-          style: TextStyle(fontSize: heightsize * 0.02),
-          controller: _ctrlexchange,
-          validator: (value) {
-            if (value!.isEmpty) {
-              return 'กรุณากรอกค่า';
-            }
-            return null;
-          },
-          decoration: const InputDecoration(
-            hintText: "exchange : ",
-            fillColor: Color(0xFFA6A6A6),
-            filled: true,
-          ),
-        ),
-      );
+    width: widthsize*0.75,
+    child: TextFormField(
+      keyboardType: TextInputType.number,
+      inputFormatters: [
+        FilteringTextInputFormatter.allow(RegExp(r'^\d+')),
+        FilteringTextInputFormatter.digitsOnly,
+      ],
+      style: TextStyle(fontSize: heightsize * 0.02),
+      controller: _ctrlexchange,
+      validator: (value) {
+        if (value!.isEmpty) {
+          return 'กรุณากรอกค่า';
+        }
+        return null;
+      },
+      decoration: InputDecoration(
+        hintText: "exchange : ",
+        fillColor: kGray75,
+        filled: true,
+        contentPadding: EdgeInsets.symmetric(vertical: heightsize * 0.008),
+      ),
+    ),
+  );
 
   Widget textfieldreceive(heightsize, widthsize) => SizedBox(
-        width: widthsize * 0.72,
-        height: heightsize * 0.06,
-        child: TextFormField(
-          keyboardType: TextInputType.number,
-          style: TextStyle(fontSize: heightsize * 0.02),
-          controller: _ctrlreceive,
-          validator: (value) {
-            if (value!.isEmpty) {
-              return 'กรุณากรอกค่า';
-            }
-            return null;
-          },
-          decoration: const InputDecoration(
-            hintText: "receive :",
-            fillColor: Color(0xFFA6A6A6),
-            filled: true,
-          ),
-        ),
-      );
+    width: widthsize*0.75,
+    child: TextFormField(
+      keyboardType: TextInputType.number,
+      inputFormatters: [
+        FilteringTextInputFormatter.digitsOnly,
+      ],
+      style: TextStyle(fontSize: heightsize * 0.02),
+      controller: _ctrlreceive,
+      validator: (value) {
+        if (value!.isEmpty) {
+          return 'กรุณากรอกค่า';
+        }
+        return null;
+      },
+      decoration: InputDecoration(
+        hintText: "receive :",
+        fillColor: kGray75,
+        filled: true,
+        contentPadding: EdgeInsets.symmetric(vertical: heightsize * 0.008),
+      ),
+    ),
+  );
 
   int selectedOption = 0; // ตัวแปรสำหรับเก็บค่าตัวเลือกที่ถูกเลือก
 
@@ -252,7 +257,7 @@ class _AddMenuItemState extends State<AddMenuItem> {
   TextStyle styletype(heightsize) {
     return TextStyle(
       fontSize: heightsize * 0.022,
-      color: Colors.white,
+      color: kGray4A,
     );
   }
 
@@ -279,7 +284,7 @@ class _AddMenuItemState extends State<AddMenuItem> {
         size: 0.05 * widthsize,
       ));
 
-  Widget btnAddMenuItem(heightsize, widthsize) => SizedBox(
+  Widget btnAddMenuItem(heightsize, widthsize) => Container(
         width: widthsize * 0.4,
         height: heightsize * 0.07,
         child: ElevatedButton(

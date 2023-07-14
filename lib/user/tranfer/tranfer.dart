@@ -7,6 +7,7 @@ import '../../application/tranferService/tranferservice.dart';
 import '../../background.dart/appstyle.dart';
 import '../../background.dart/background.dart';
 import '../../background.dart/securestorage.dart';
+import '../aboutqr/qrscaner.dart';
 
 class TranferPage extends StatefulWidget {
   const TranferPage({super.key});
@@ -51,7 +52,7 @@ class _TranferPageState extends State<TranferPage> {
           child: SingleChildScrollView(
         child: Stack(children: [
           Mystlye().buildBackground(
-              widthsize, heightsize, context, "โอนพ้อยท์", true, 0.22),
+              widthsize, heightsize, context, "โอนพอยท์", true, 0.22),
           Padding(
             padding: EdgeInsets.all(widthsize * 0.03),
             child: Form(
@@ -76,7 +77,7 @@ class _TranferPageState extends State<TranferPage> {
   }
 
   Widget showPoint(widthsize, heightsize) => Container(
-        padding: EdgeInsets.all(widthsize * 0.05),
+        padding: EdgeInsets.all(widthsize * 0.04),
         width: widthsize * 0.8,
         height: heightsize * 0.127,
         decoration: const BoxDecoration(
@@ -113,9 +114,15 @@ class _TranferPageState extends State<TranferPage> {
   Widget textFieldID(heightsize) => SizedBox(
         height: heightsize * 0.1,
         child: TextFormField(
+          autovalidateMode: AutovalidateMode.onUserInteraction,
           validator: (value) {
             if (value!.isEmpty) {
               return 'กรุณากรอกค่า';
+            } else if (value.length != 9 ||
+                !RegExp(r'^[0-9]+$').hasMatch(value)) {
+              return 'รูปแบบข้อความไม่ถูกต้อง';
+            } else if (value == idAccount) {
+              return 'ไม่สามารถส่งพ้อยไปยังไอดีต้นทางได้';
             }
             return null;
           },
@@ -123,21 +130,34 @@ class _TranferPageState extends State<TranferPage> {
           keyboardType: TextInputType.emailAddress,
           style: TextStyle(fontSize: heightsize * 0.02),
           decoration: InputDecoration(
-            border: const OutlineInputBorder(
-                borderRadius: BorderRadius.all(Radius.circular(15))),
-            contentPadding: EdgeInsets.symmetric(vertical: heightsize * 0.008),
-            fillColor: kWhite,
-            filled: true,
-            hintText: "User ID",
-            prefixIcon: const Icon(Icons.person_2_outlined),
-          ),
+              border: const OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(15))),
+              contentPadding:
+                  EdgeInsets.symmetric(vertical: heightsize * 0.008),
+              fillColor: kWhite,
+              filled: true,
+              hintText: "User ID",
+              prefixIcon: const Icon(Icons.person_2_outlined),
+              suffixIcon: InkWell(
+                  onTap: () {
+                    Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const QrScaner()));
+                  },
+                  child: const Icon(Icons.qr_code_scanner))),
         ),
       );
 
   Widget textFieldPoint(heightsize) => TextFormField(
+        autovalidateMode: AutovalidateMode.onUserInteraction,
         validator: (value) {
           if (value!.isEmpty) {
             return 'กรุณากรอกค่า';
+          } else if (int.tryParse(value) == null || int.parse(value) <= 0) {
+            return 'รูปแบบข้อมูลไม่ถูกต้อง';
+          } else if (int.parse(value) > pointid) {
+            return 'จำนวนPointไม่เพียงพอ';
           }
           return null;
         },
@@ -162,10 +182,7 @@ class _TranferPageState extends State<TranferPage> {
         child: ElevatedButton(
           onPressed: btntranferPage,
           style: ElevatedButton.styleFrom(
-              backgroundColor: kYellow,
-              shape: const StadiumBorder(),
-              elevation: 5,
-              shadowColor: Colors.grey),
+              backgroundColor: kYellow, shape: const StadiumBorder()),
           child: Text(
             "ถัดไป",
             style: TextStyle(
@@ -184,7 +201,7 @@ class _TranferPageState extends State<TranferPage> {
             .then((value) => {
                   if (value != null)
                     {
-                      Navigator.pushReplacement(
+                      Navigator.push(
                           context,
                           MaterialPageRoute(
                               builder: (context) => ConfirmTranfer(

@@ -5,19 +5,25 @@ import '../../background.dart/appstyle.dart';
 import '../../background.dart/background.dart';
 
 class DetailTranfer extends StatelessWidget {
-  const DetailTranfer(
-      {Key? key,
-      required this.idAccount,
-      required this.state,
-      required this.payee,
-      required this.date,
-      required this.point,})
-      : super(key: key);
+  const DetailTranfer({
+    Key? key,
+    required this.idAccount,
+    required this.idname,
+    required this.state,
+    required this.payee,
+    required this.payeename,
+    required this.date,
+    required this.point,
+    required this.balance
+  }) : super(key: key);
   final String idAccount;
+  final String idname;
   final String state;
   final String payee;
+  final String payeename;
   final String date;
   final int point;
+  final int balance;
 
   @override
   Widget build(BuildContext context) {
@@ -68,12 +74,12 @@ class DetailTranfer extends StatelessWidget {
             Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
               Text("การทำรายการ",
                   style: mystyleText(heightsize, 0.03, kGray4A, true)),
-              Text("100", style: mystyleText(heightsize, 0.03, kGray4A, true))
+              Text(NumberFormat("#,##0").format(point), style: mystyleText(heightsize, 0.03, kGray4A, true))
             ]),
             Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
               Text("ยอดคงเหลือ",
                   style: mystyleText(heightsize, 0.03, kGray4A, true)),
-              Text("3600", style: mystyleText(heightsize, 0.03, kGray4A, true))
+              Text(NumberFormat("#,##0").format(balance), style: mystyleText(heightsize, 0.03, kGray4A, true))
             ])
           ],
         ),
@@ -88,7 +94,7 @@ class DetailTranfer extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("29 มค 2566",
+            Text(date.toString(),
                 style: mystyleText(heightsize, 0.023, kBlack, false)),
             SizedBox(height: heightsize * 0.01),
             Text(isDeposit(state) ? "รับพอยท์" : "โอนพอยท์",
@@ -118,24 +124,50 @@ class DetailTranfer extends StatelessWidget {
               padding: EdgeInsets.all(widthsize * 0.04),
               child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text("จากบัญชี",
-                        style: mystyleText(heightsize, 0.03, kBlack, false)),
-                    Text("USER ID $idAccount",
-                        style: mystyleText(heightsize, 0.03, kBlack, false))
+                        style: mystyleText(heightsize, 0.025, kBlack, false)),
+                    SizedBox(
+                      width: widthsize * 0.4,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(idname,
+                              style:
+                                  mystyleText(heightsize, 0.025, kBlack, true)),
+                          Text("USER ID $idAccount",
+                              style:
+                                  mystyleText(heightsize, 0.02, kBlack, false)),
+                        ],
+                      ),
+                    )
                   ]),
             ),
             Container(
               padding: EdgeInsets.all(widthsize * 0.04),
               child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       "ไปยัง",
-                      style: mystyleText(heightsize, 0.03, kBlack, false),
+                      style: mystyleText(heightsize, 0.025, kBlack, false),
                     ),
-                    Text(payee,
-                        style: mystyleText(heightsize, 0.03, kBlack, false))
+                    SizedBox(
+                      width: widthsize * 0.4,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(payeename,
+                              style:
+                                  mystyleText(heightsize, 0.025, kBlack, true)),
+                          Text("USER ID $payee",
+                              style:
+                                  mystyleText(heightsize, 0.02, kBlack, false)),
+                        ],
+                      ),
+                    )
                   ]),
             ),
             Container(
@@ -156,7 +188,7 @@ class DetailTranfer extends StatelessWidget {
                     Text("จำนวนPoint",
                         style: mystyleText(heightsize, 0.03, kBlack, false)),
                     Text(
-                      NumberFormat("#,##0").format(3000),
+                      "${NumberFormat("#,##0").format(point)} พอยท์",
                       style: mystyleText(heightsize, 0.03, kBlack, false),
                     )
                   ]),

@@ -1,22 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:zeencamp_v2/shop/tranferbill/createbill.dart';
 import 'package:zeencamp_v2/user/tranfer/confirm.dart';
 
-import '../../application/accountService/accountservice.dart';
-import '../../application/tranferService/tranferservice.dart';
-import '../../background.dart/appstyle.dart';
-import '../../background.dart/background.dart';
-import '../../background.dart/securestorage.dart';
+import '../../../application/accountService/accountservice.dart';
+import '../../../application/tranferService/tranferservice.dart';
+import '../../../background.dart/appstyle.dart';
+import '../../../background.dart/background.dart';
+import '../../../background.dart/securestorage.dart';
 
-class QrTranFer extends StatefulWidget {
-  const QrTranFer({Key? key, required this.idstore}) : super(key: key);
-  final String idstore;
+class BillChoice extends StatefulWidget {
+  const BillChoice({super.key});
 
   @override
-  State<QrTranFer> createState() => _QrTranFerState();
+  State<BillChoice> createState() => _BillChoiceState();
 }
 
-class _QrTranFerState extends State<QrTranFer> {
+class _BillChoiceState extends State<BillChoice> {
   final _ctrlID = TextEditingController();
   final _ctrlPoint = TextEditingController();
   final _formKey = GlobalKey<FormState>();
@@ -44,7 +44,6 @@ class _QrTranFerState extends State<QrTranFer> {
 
   @override
   Widget build(BuildContext context) {
-    _ctrlID.text = widget.idstore;
     final heightsize = MediaQuery.of(context).size.height -
         MediaQuery.of(context).padding.vertical;
     final widthsize = MediaQuery.of(context).size.width;
@@ -53,8 +52,9 @@ class _QrTranFerState extends State<QrTranFer> {
           child: SingleChildScrollView(
         child: Stack(children: [
           Mystlye().buildBackground(
-              widthsize, heightsize, context, "โอนพ้อยท์", true, 0.22),
-          Padding(
+              widthsize, heightsize, context, "สร้างบิล", true, 0.22),
+          Container(
+            height: heightsize,
             padding: EdgeInsets.all(widthsize * 0.03),
             child: Form(
               key: _formKey,
@@ -63,11 +63,16 @@ class _QrTranFerState extends State<QrTranFer> {
                 children: [
                   SizedBox(height: heightsize * 0.15),
                   Center(child: showPoint(widthsize, heightsize)),
-                  SizedBox(height: heightsize * 0.04),
-                  textFieldID(heightsize),
-                  textFieldPoint(heightsize),
-                  SizedBox(height: heightsize * 0.22),
-                  qrTranFerButton(heightsize, widthsize, context)
+                  Expanded(
+                    child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          goReceive(widthsize, heightsize),
+                          SizedBox(height: heightsize * 0.04),
+                          goExchange(widthsize, heightsize),
+                          SizedBox(height: heightsize * 0.1),
+                        ]),
+                  ),
                 ],
               ),
             ),
@@ -78,9 +83,9 @@ class _QrTranFerState extends State<QrTranFer> {
   }
 
   Widget showPoint(widthsize, heightsize) => Container(
-        padding: EdgeInsets.all(widthsize * 0.05),
+        padding: EdgeInsets.all(widthsize * 0.04),
         width: widthsize * 0.8,
-        height: heightsize * 0.13,
+        height: heightsize * 0.127,
         decoration: const BoxDecoration(
           borderRadius: BorderRadius.all(Radius.circular(15)),
           color: kWhite,
@@ -112,74 +117,49 @@ class _QrTranFerState extends State<QrTranFer> {
         ),
       );
 
-  Widget textFieldID(heightsize) => SizedBox(
-        height: heightsize * 0.1,
-        child: TextFormField(
-          readOnly: true,
-          validator: (value) {
-            if (value!.isEmpty) {
-              return 'กรุณากรอกค่า';
-            }
-            return null;
-          },
-          controller: _ctrlID,
-          keyboardType: TextInputType.emailAddress,
-          style: TextStyle(fontSize: heightsize * 0.02),
-          decoration: InputDecoration(
-            border: const OutlineInputBorder(
-                borderRadius: BorderRadius.all(Radius.circular(15))),
-            contentPadding: EdgeInsets.symmetric(vertical: heightsize * 0.008),
-            fillColor: kWhite,
-            filled: true,
-            hintText: "User ID",
-            prefixIcon: const Icon(Icons.person_2_outlined),
+  Widget goReceive(widthsize, heightsize) => InkWell(
+        onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => const CreateBill(
+                      isReceive: true,
+                    ))),
+        child: Container(
+          padding: EdgeInsets.all(widthsize * 0.04),
+          width: widthsize * 0.8,
+          height: heightsize * 0.127,
+          decoration: const BoxDecoration(
+            borderRadius: BorderRadius.all(Radius.circular(15)),
+            color: kWhite,
           ),
+          child: Center(
+              child: Text(
+            "ให้พอยท์ลูกค้า",
+            style: mystyleText(heightsize, 0.04, kGray4A, true),
+          )),
         ),
       );
 
-  Widget textFieldPoint(heightsize) => TextFormField(
-        validator: (value) {
-          if (value!.isEmpty) {
-            return 'กรุณากรอกค่า';
-          }
-          return null;
-        },
-        controller: _ctrlPoint,
-        style: TextStyle(fontSize: heightsize * 0.02),
-        decoration: InputDecoration(
-          border: const OutlineInputBorder(
-              borderRadius: BorderRadius.all(Radius.circular(15))),
-          contentPadding: EdgeInsets.symmetric(vertical: heightsize * 0.008),
-          fillColor: kWhite,
-          filled: true,
-          hintText: "จำนวน",
-          prefixIcon: const Icon(Icons.money),
-        ),
-      );
-
-  Widget qrTranFerButton(
-          double heightsize, double widthsize, BuildContext context) =>
-      SizedBox(
-        width: widthsize * 0.7,
-        height: heightsize * 0.055,
-        child: ElevatedButton(
-          onPressed: btnQrTranFer,
-          style: ElevatedButton.styleFrom(
-              backgroundColor: kYellow,
-              shape: const StadiumBorder(),
-              elevation: 5,
-              shadowColor: Colors.grey),
-          child: Text(
-            "ถัดไป",
-            style: TextStyle(
-                color: kBlack,
-                fontWeight: FontWeight.bold,
-                fontSize: heightsize * 0.035),
+  Widget goExchange(widthsize, heightsize) => InkWell(
+        onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => const CreateBill(isReceive: false))),
+        child: Container(
+          padding: EdgeInsets.all(widthsize * 0.04),
+          width: widthsize * 0.8,
+          height: heightsize * 0.127,
+          decoration: const BoxDecoration(
+            borderRadius: BorderRadius.all(Radius.circular(15)),
+            color: kWhite,
           ),
+          child: Center(
+              child: Text("รับพอยท์ลูกค้า",
+                  style: mystyleText(heightsize, 0.04, kGray4A, true))),
         ),
       );
 
-  void btnQrTranFer() {
+  void btnBillChoice() {
     if (_formKey.currentState!.validate()) {
       if (int.parse(_ctrlPoint.text) < pointid) {
         TranferService()
@@ -187,7 +167,7 @@ class _QrTranFerState extends State<QrTranFer> {
             .then((value) => {
                   if (value != null)
                     {
-                      Navigator.pushReplacement(
+                      Navigator.push(
                           context,
                           MaterialPageRoute(
                               builder: (context) => ConfirmTranfer(

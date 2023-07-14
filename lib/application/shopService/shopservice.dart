@@ -1,8 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:zeencamp_v2/domain/dmstore/detailshopdm.dart';
 import '../../domain/dmstore/allstore.dart';
+import '../../domain/dmstore/getpayment.dart';
 import '../../domain/dmstore/storecheck.dart';
 import '../accountService/accountservice.dart';
 
@@ -18,7 +20,7 @@ class StoresService {
         HttpHeaders.authorizationHeader: 'Bearer $token',
       },
     );
-
+    print(response.statusCode);
     if (response.statusCode == 200) {
       var decodeutf8 = utf8.decode(response.bodyBytes);
       final List<dynamic> jsonList = jsonDecode(decodeutf8);
@@ -162,22 +164,22 @@ class StoresService {
     ));
 
     var response = await request.send();
-    print(response.statusCode);
     if (response.statusCode == 200) {
-      print('ส่งข้อมูลเรียบร้อย');
+      debugPrint('ส่งข้อมูลเรียบร้อย');
     } else {
-      print('เกิดข้อผิดพลาดในการส่งข้อมูล: ${response.statusCode}');
+      debugPrint('เกิดข้อผิดพลาดในการส่งข้อมูล: ${response.statusCode}');
     }
   }
 
   Future<Check> deleteMenu(String token, String idMenu) async {
     var response = await http.delete(
-      Uri.parse(
-          'http://$ipAddress:$port/api/v1/stores/delete-menu?idMenu=$idMenu'),
+      Uri.parse('http://$ipAddress:$port/api/v1/secure/data/delete?id=$idMenu'),
       headers: {
         HttpHeaders.authorizationHeader: 'Bearer $token',
       },
     );
+
+    print(response.statusCode);
     if (response.statusCode == 200) {
       return Check.fromJson(jsonDecode(response.body));
     } else {
@@ -206,6 +208,45 @@ class StoresService {
       return stores;
     } else {
       throw Exception('Failed to fetch stores');
+    }
+  }
+
+  Future<List<PaymentList?>> getPaymentList(token) async {
+    final response = await http.get(
+      Uri.parse('http://$ipAddress:$port/api/v1/secure/payment/get-payment-list'),
+      headers: {
+        'content-type': 'application/json',
+        HttpHeaders.authorizationHeader: 'Bearer $token',
+      },
+    );
+    print(response.statusCode);
+    if (response.statusCode == 200) {
+      // final data = jsonDecode(response.body) as List<dynamic>;
+      // return data.map((item) => PaymentList.fromJson(item)).toList();
+      List<dynamic> jsonData = jsonDecode(response.body);
+      List<PaymentList> data =
+          jsonData.map((json) => PaymentList.fromJson(json)).toList();
+      return data;
+    } else {
+      return [];
+    }
+  }
+
+  Future<Check> buyPaymentConfirm(
+      String token, String idpayment, String pswd) async {
+    var response = await http.post(
+        Uri.parse(
+            'http://$ipAddress:$port/api/v1/secure/payment/buy-payment-confirm'),
+        headers: {
+          HttpHeaders.authorizationHeader: 'Bearer $token',
+        },
+        body: jsonEncode(
+            <String, String>{'id': idpayment, 'password': pswd}));
+    print(response.statusCode);
+    if (response.statusCode == 200) {
+      return Check.fromJson(jsonDecode(response.body));
+    } else {
+      return Check(code: response.statusCode, message: "message");
     }
   }
 }

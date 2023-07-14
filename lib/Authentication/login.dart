@@ -29,10 +29,10 @@ class _LoginPageState extends State<LoginPage> {
     final widthsize = MediaQuery.of(context).size.width;
     return Scaffold(
       body: SafeArea(
-          child: Stack(
-        children: [
-          SingleChildScrollView(
-            child: Container(
+          child: SingleChildScrollView(
+            child: Stack(
+                  children: [
+            Container(
               padding: EdgeInsets.all(widthsize * 0.08),
               height: heightsize - MediaQuery.of(context).padding.vertical,
               width: widthsize,
@@ -54,29 +54,23 @@ class _LoginPageState extends State<LoginPage> {
                     SizedBox(height: heightsize * 0.02),
                     textFieldUser(heightsize),
                     textFieldPassword(heightsize),
-                    pwRemember(heightsize,widthsize),
+                    pwRemember(heightsize, widthsize),
                     SizedBox(height: heightsize * 0.08),
                     Center(child: loginButton(heightsize, widthsize, context))
                   ],
                 ),
               ),
             ),
-          ),
-          Positioned(
-              child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.end,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                goRegister(heightsize, widthsize, context),
-                SizedBox(
-                  height: heightsize * 0.05,
+            Positioned(
+              bottom: 0,
+                child: SizedBox(
+                  width: widthsize,
+                  height: heightsize*0.15,
+                  child: Center(child: goRegister(heightsize, widthsize, context)),
+                )),
+                  ],
                 ),
-              ],
-            ),
-          ))
-        ],
-      )),
+          )),
     );
   }
 
@@ -136,7 +130,7 @@ class _LoginPageState extends State<LoginPage> {
             contentPadding: EdgeInsets.symmetric(vertical: heightsize * 0.008),
             fillColor: kGrayD9,
             filled: true,
-            hintText: "Email",
+            hintText: "อีเมล",
             prefixIcon: const Icon(Icons.email_outlined),
           ),
         ),
@@ -161,7 +155,7 @@ class _LoginPageState extends State<LoginPage> {
             contentPadding: EdgeInsets.symmetric(vertical: heightsize * 0.008),
             fillColor: kGrayD9,
             filled: true,
-            hintText: "Password",
+            hintText: "รหัสผ่าน",
             prefixIcon: const Icon(Icons.lock_outline),
             suffixIcon: GestureDetector(
                 onTap: () {
@@ -173,10 +167,10 @@ class _LoginPageState extends State<LoginPage> {
                     obscureText ? Icons.visibility : Icons.visibility_off))),
       );
 
-  Widget pwRemember(heightsize,widthsize) => Row(
+  Widget pwRemember(heightsize, widthsize) => Row(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          SizedBox(width: widthsize*0.03),
+          SizedBox(width: widthsize * 0.03),
           InkWell(
             onTap: () {
               Navigator.push(
@@ -184,10 +178,10 @@ class _LoginPageState extends State<LoginPage> {
                   MaterialPageRoute(
                       builder: (context) => const ForgotPassword()));
             },
-            child:  Text("ลืมรหัสผ่าน ?",
+            child: Text("ลืมรหัสผ่าน ?",
                 style: TextStyle(
                   color: kDarkYellow,
-                  fontSize: heightsize*0.021,
+                  fontSize: heightsize * 0.021,
                   fontWeight: FontWeight.bold,
                   decoration: TextDecoration.underline, // เพิ่มเส้นใต้
                   decorationColor:
@@ -207,9 +201,7 @@ class _LoginPageState extends State<LoginPage> {
           onPressed: btnlogin,
           style: ElevatedButton.styleFrom(
               backgroundColor: kYellow,
-              shape: const StadiumBorder(),
-              elevation: 5,
-              shadowColor: Colors.grey),
+              shape: const StadiumBorder(),),
           child: Text(
             "เข้าสู่ระบบ",
             style: mystyleText(heightsize, 0.025, kGray4A, true),
@@ -229,10 +221,12 @@ class _LoginPageState extends State<LoginPage> {
                         {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => const MenuUser()),
+                            MaterialPageRoute(
+                                builder: (context) => const MenuUser()),
                           ),
                           SecureStorage().write('token', value.accessToken),
                           SecureStorage().write('idAccount', value.accountid),
+                          SecureStorage().write('isstore', value.isstore.toString()),
                           context.read<AppData>().token = value.accessToken,
                           context.read<AppData>().idAccount = value.accountid,
                         }
@@ -241,10 +235,12 @@ class _LoginPageState extends State<LoginPage> {
                       {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => const MenuShop()),
+                          MaterialPageRoute(
+                              builder: (context) => const MenuShop()),
                         ),
                         SecureStorage().write('token', value.accessToken),
                         SecureStorage().write('idAccount', value.accountid),
+                        SecureStorage().write('isstore', value.isstore.toString()),
                         context.read<AppData>().token = value.accessToken,
                         context.read<AppData>().idAccount = value.accountid,
                       }

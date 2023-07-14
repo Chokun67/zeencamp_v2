@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:zeencamp_v2/background.dart/appstyle.dart';
 
 import '../../background.dart/securestorage.dart';
 
 class QrReceive extends StatefulWidget {
-  const QrReceive({super.key});
+    const QrReceive({Key? key, required this.idshop}) : super(key: key);
+  final String idshop;
 
   @override
   State<QrReceive> createState() => _QrReceiveState();
@@ -26,18 +28,20 @@ class _QrReceiveState extends State<QrReceive> {
 
   @override
   Widget build(BuildContext context) {
+    // final heightsize = MediaQuery.of(context).size.height- MediaQuery.of(context).padding.vertical;
+    final widthsize = MediaQuery.of(context).size.width;
     return Scaffold(
       appBar: AppBar(
         title: const Text('QR รับเงิน'),
-        backgroundColor: const Color(0xFF4A4A4A),
-        foregroundColor: const Color(0xFFFFD600),
+        backgroundColor: kYellow,
+        foregroundColor: kGray4A,
       ),
       body: Center(
         child: QrImageView(
-          data: idAccount,
+          data: widget.idshop,
           version: QrVersions.auto,
           backgroundColor: Colors.white,
-          size: 200.0,
+          size: widthsize*0.5,
         ),
       ),
     );

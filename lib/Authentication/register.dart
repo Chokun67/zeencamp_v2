@@ -35,7 +35,7 @@ class _RegisterPageState extends State<RegisterPage> {
           child: Container(
         height: heightsize,
         width: widthsize,
-        color: kGrayD9,
+        color: kWhite,
         child: SingleChildScrollView(
           child: Padding(
             padding: EdgeInsets.all(widthsize * 0.08),
@@ -101,7 +101,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
               ),
             ),
-            SizedBox(height: heightsize * 0.03),
+            SizedBox(height: heightsize * 0.02),
             Text(
               "Create a new\naccount",
               style: TextStyle(
@@ -120,10 +120,8 @@ class _RegisterPageState extends State<RegisterPage> {
         validator: (value) {
           if (value!.isEmpty) {
             return 'กรุณาป้อนอีเมล';
-          } else if (value.length < 8) {
-            return 'ต้องมีความยาวมากกว่าเท่ากับ 8 ตัวอักษร';
           } else if (!value.contains("@") ||
-              RegExp(r'^[\u0E00-\u0E7F]+$').hasMatch(value)) {
+              RegExp(r'[ก-๙เแไใๆ]').hasMatch(value)) {
             return 'รูปแบบอีเมลไม่ถูกต้อง';
           }
           return null;
@@ -132,9 +130,9 @@ class _RegisterPageState extends State<RegisterPage> {
           border: const OutlineInputBorder(
               borderRadius: BorderRadius.all(Radius.circular(15))),
           contentPadding: EdgeInsets.symmetric(vertical: heightsize * 0.008),
-          fillColor: kWhite,
+          fillColor: kGrayD9,
           filled: true,
-          hintText: "Email",
+          hintText: "อีเมล",
           prefixIcon: const Icon(Icons.email_outlined),
         ),
       );
@@ -154,9 +152,9 @@ class _RegisterPageState extends State<RegisterPage> {
           border: const OutlineInputBorder(
               borderRadius: BorderRadius.all(Radius.circular(15))),
           contentPadding: EdgeInsets.symmetric(vertical: heightsize * 0.008),
-          fillColor: kWhite,
+          fillColor: kGrayD9,
           filled: true,
-          hintText: "Username",
+          hintText: "ชื่อผู้ใช้",
           prefixIcon: const Icon(Icons.person_2_outlined),
         ),
       );
@@ -179,9 +177,9 @@ class _RegisterPageState extends State<RegisterPage> {
             border: const OutlineInputBorder(
                 borderRadius: BorderRadius.all(Radius.circular(15))),
             contentPadding: EdgeInsets.symmetric(vertical: heightsize * 0.008),
-            fillColor: kWhite,
+            fillColor: kGrayD9,
             filled: true,
-            hintText: "Password",
+            hintText: "รหัสผ่าน",
             prefixIcon: const Icon(Icons.lock_outline),
             suffixIcon: GestureDetector(
                 onTap: () {
@@ -211,9 +209,9 @@ class _RegisterPageState extends State<RegisterPage> {
             border: const OutlineInputBorder(
                 borderRadius: BorderRadius.all(Radius.circular(15))),
             contentPadding: EdgeInsets.symmetric(vertical: heightsize * 0.008),
-            fillColor: kWhite,
+            fillColor: kGrayD9,
             filled: true,
-            hintText: "Confirm Password",
+            hintText: "ยืนยันรหัสผ่าน",
             prefixIcon: const Icon(Icons.lock_outline),
             suffixIcon: GestureDetector(
                 onTap: () {
@@ -225,49 +223,53 @@ class _RegisterPageState extends State<RegisterPage> {
                     obscureText2 ? Icons.visibility : Icons.visibility_off))),
       );
 
-  Widget textfieldbirthday(heightsize, widthsize) => SizedBox(
-        height: heightsize * 0.055,
-        child: TextFormField(
-          controller: _ctrldatetime,
-          readOnly: true,
-          style: TextStyle(fontSize: heightsize * 0.02),
-          decoration: InputDecoration(
-              border: const OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(15))),
-              fillColor: kWhite,
-              filled: true,
-              hintText: "Birthday",
-              prefixIcon: const Icon(Icons.cake_outlined),
-              suffixIcon: InkWell(
-                  onTap: () async {
-                    final DateTime? dateTime = await showDatePicker(
-                      context: context,
-                      initialDate: selectedDate,
-                      firstDate: DateTime(1940),
-                      lastDate: DateTime.now(),
-                      builder: (BuildContext context, Widget? child) {
-                        return Theme(
-                          data: ThemeData.light().copyWith(
-                            colorScheme: const ColorScheme.light().copyWith(
-                              primary: kDarkYellow, // กำหนดสีหัวข้อที่ต้องการ
-                            ),
-                          ),
-                          child: child ?? const SizedBox(),
-                        );
-                      },
-                    );
+  Widget textfieldbirthday(heightsize, widthsize) => TextFormField(
+    controller: _ctrldatetime,
+    validator: (value) {
+      if (value!.isEmpty) {
+        return 'กรุณากรอกค่า';
+      }
+      return null;
+    },
+    readOnly: true,
+    style: TextStyle(fontSize: heightsize * 0.02),
+    decoration: InputDecoration(
+        border: const OutlineInputBorder(
+            borderRadius: BorderRadius.all(Radius.circular(15))),
+            contentPadding: EdgeInsets.symmetric(vertical: heightsize * 0.008),
+        fillColor: kGrayD9,
+        filled: true,
+        hintText: "วันเกิด",
+        prefixIcon: const Icon(Icons.cake_outlined),
+        suffixIcon: InkWell(
+            onTap: () async {
+              final DateTime? dateTime = await showDatePicker(
+                context: context,
+                initialDate: selectedDate,
+                firstDate: DateTime(1940),
+                lastDate: DateTime.now(),
+                builder: (BuildContext context, Widget? child) {
+                  return Theme(
+                    data: ThemeData.light().copyWith(
+                      colorScheme: const ColorScheme.light().copyWith(
+                        primary: kDarkYellow, // กำหนดสีหัวข้อที่ต้องการ
+                      ),
+                    ),
+                    child: child ?? const SizedBox(),
+                  );
+                },
+              );
 
-                    if (dateTime != null) {
-                      setState(() {
-                        selectedDate = dateTime;
-                        _ctrldatetime.text =
-                            "${selectedDate.day}/${selectedDate.month}/${selectedDate.year}";
-                      });
-                    }
-                  },
-                  child: Icon(Icons.arrow_drop_down, size: widthsize * 0.1))),
-        ),
-      );
+              if (dateTime != null) {
+                setState(() {
+                  selectedDate = dateTime;
+                  _ctrldatetime.text =
+                      "${selectedDate.day}/${selectedDate.month}/${selectedDate.year}";
+                });
+              }
+            },
+            child: Icon(Icons.arrow_drop_down, size: widthsize * 0.1))),
+  );
 
   Widget textfieldgender(heightsize, widthsize) {
     void showGenderMenu() {
@@ -304,23 +306,27 @@ class _RegisterPageState extends State<RegisterPage> {
         },
       );
     }
-
-    return SizedBox(
-      height: heightsize * 0.055,
-      child: TextFormField(
-          readOnly: true,
-          style: TextStyle(fontSize: heightsize * 0.02),
-          decoration: InputDecoration(
-              border: const OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(15))),
-              fillColor: kWhite,
-              filled: true,
-              hintText: "Gender",
-              prefixIcon: const Icon(Icons.cake_outlined),
-              suffixIcon: InkWell(
-                  onTap: showGenderMenu,
-                  child: Icon(Icons.arrow_drop_down, size: widthsize * 0.1))),
-          controller: _ctrlgender),
+    return TextFormField(
+      readOnly: true,
+      style: TextStyle(fontSize: heightsize * 0.02),
+      decoration: InputDecoration(
+          border: const OutlineInputBorder(
+              borderRadius: BorderRadius.all(Radius.circular(15))),
+          contentPadding: EdgeInsets.symmetric(vertical: heightsize * 0.008),
+          fillColor: kGrayD9,
+          filled: true,
+          hintText: "เพศ",
+          prefixIcon: const Icon(Icons.cake_outlined),
+          suffixIcon: InkWell(
+              onTap: showGenderMenu,
+              child: Icon(Icons.arrow_drop_down, size: widthsize * 0.1))),
+      controller: _ctrlgender,
+      validator: (value) {
+        if (value!.isEmpty) {
+          return 'กรุณากรอกค่า';
+        }
+        return null;
+      },
     );
   }
 
@@ -332,10 +338,7 @@ class _RegisterPageState extends State<RegisterPage> {
         child: ElevatedButton(
           onPressed: btnregister,
           style: ElevatedButton.styleFrom(
-              backgroundColor: kYellow,
-              shape: const StadiumBorder(),
-              elevation: 5,
-              shadowColor: Colors.grey),
+              backgroundColor: kYellow, shape: const StadiumBorder()),
           child: Text(
             "ลงทะเบียน",
             style: mystyleText(heightsize, 0.025, kGray4A, true),
@@ -354,10 +357,12 @@ class _RegisterPageState extends State<RegisterPage> {
                     {
                       Navigator.pushReplacement(
                         context,
-                        MaterialPageRoute(builder: (context) => const MenuUser()),
+                        MaterialPageRoute(
+                            builder: (context) => const MenuUser()),
                       ),
                       SecureStorage().write('token', value.accessToken),
                       SecureStorage().write('idAccount', value.accountid),
+                      SecureStorage().write('isstore', value.isstore.toString()),
                       context.read<AppData>().token = value.accessToken,
                       context.read<AppData>().idAccount = value.accountid,
                     }
@@ -378,7 +383,7 @@ class _RegisterPageState extends State<RegisterPage> {
       Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text("Already have an account?",
+          Text("มีบัญชีอยู่แล้ว?",
               style: TextStyle(
                 color: kBlack,
                 fontSize: heightsize * 0.02,
@@ -386,7 +391,7 @@ class _RegisterPageState extends State<RegisterPage> {
           TextButton(
               onPressed: () => Navigator.pop(context),
               child: Text(
-                "Login",
+                "เข้าสู่ระบบ",
                 style: TextStyle(
                     color: kDarkYellow,
                     fontSize: heightsize * 0.02,

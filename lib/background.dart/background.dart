@@ -37,8 +37,8 @@ class Mystlye {
           ),
           back
               ? Positioned(
-            top: widthsize * 0.077,
-            left: widthsize * 0.077,
+            top: widthsize * 0.055,
+            left: widthsize * 0.055,
             child: IconButton(
               onPressed: () {
                 Navigator.pop(context);

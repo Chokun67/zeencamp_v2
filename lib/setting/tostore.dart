@@ -1,10 +1,13 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:zeencamp_v2/background.dart/appstyle.dart';
 import '../Authentication/login.dart';
 import '../application/shopService/shopservice.dart';
 import '../background.dart/background.dart';
 import '../background.dart/securestorage.dart';
+import '../shop/map/select.dart';
 
 class ToStore extends StatefulWidget {
   const ToStore({super.key});
@@ -30,15 +33,38 @@ class _ToStoreState extends State<ToStore> {
     }
   }
 
+  Future<Position> getgeoloca() async {
+    bool serviceEnable = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnable) {
+      Future.error("Location are disable");
+    }
+
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        return Future.error(
+            "Location persossons are permanently denied, we cannot request");
+      }
+    }
+    return await Geolocator.getCurrentPosition();
+  }
+
   var pointid = 0;
   var token = "";
   var iduser = "";
   var idname = "";
   var idAccount = "";
+  var storeLocation = "";
+  var currentlocation = "";
   @override
   void initState() {
     super.initState();
     getData();
+    getgeoloca().then((value) => {
+          print("${value.latitude},${value.longitude}"),
+          currentlocation = "${value.latitude},${value.longitude}",
+        });
   }
 
   Future<void> getData() async {
@@ -53,38 +79,58 @@ class _ToStoreState extends State<ToStore> {
     final widthsize = MediaQuery.of(context).size.width;
     return Scaffold(
       body: SafeArea(
-        child: Stack(
-          children: [
-            Mystlye().buildBackground(
-            widthsize,
-            heightsize - MediaQuery.of(context).padding.vertical,
-            context,
-            "การตั้งค่า",
-            true,
-            0.2),
-            deTail(widthsize, heightsize, context)
-          ],
-        ),
+        child: FutureBuilder(
+            future: getgeoloca().then((value) => {
+                  currentlocation = "${value.latitude},${value.longitude}",
+                }),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              }
+              if (snapshot.hasError) {
+                return Center(child: Text('Error: ${snapshot.error}'));
+              } else {
+                return Stack(
+                  children: [
+                    Mystlye().buildBackground(
+                        widthsize,
+                        heightsize - MediaQuery.of(context).padding.vertical,
+                        context,
+                        "การตั้งค่า",
+                        true,
+                        0.2),
+                    deTail(widthsize, heightsize, context)
+                  ],
+                );
+              }
+            }),
       ),
     );
   }
 
   Widget deTail(widthsize, heightsize, context) => Center(
-    child: Container(
+        child: Container(
           padding: EdgeInsets.only(top: heightsize * 0.1),
           height: heightsize * 0.7,
           width: widthsize,
           child: Form(
             key: _formKey,
-            child:
-                Column(crossAxisAlignment: CrossAxisAlignment.center, children: [
-              imageHere(widthsize),
-              iconPickPicture(widthsize),
-              btnToStore(heightsize, widthsize),
-            ]),
+            child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  imageHere(widthsize),
+                  iconPickPicture(widthsize),
+                  Text("เลือกพิกัดร้านค้า:\n$storeLocation",style: mystyleText(heightsize, 0.02, kGray4A, true)),
+                  Text("ระยะห่าง:\n$storeLocation",style: mystyleText(heightsize, 0.02, kGray4A, true)),
+                  Text("ตำแหน่งปัจจุบัน$currentlocation",style: mystyleText(heightsize, 0.02, kGray4A, true)),
+                  picklatlng(heightsize, widthsize),
+                  btnToStore(heightsize, widthsize),
+                ]),
           ),
         ),
-  );
+      );
 
   Widget imageHere(widthsize) => SizedBox(
         height: widthsize * 0.5,
@@ -106,6 +152,28 @@ class _ToStoreState extends State<ToStore> {
       },
       icon: Icon(
         Icons.photo_album_outlined,
+        size: 0.05 * widthsize,
+      ));
+
+  Widget picklatlng(heightsize, widthsize) => IconButton(
+      onPressed: () {
+        {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => MyMap(geolocation: currentlocation)),
+          ).then((value) {
+            if (value != null) {
+              print('Returned value from SecondPage: $value');
+              setState(() {
+                storeLocation = value;
+              });
+            }
+          });
+        }
+      },
+      icon: Icon(
+        Icons.location_city,
         size: 0.05 * widthsize,
       ));
 

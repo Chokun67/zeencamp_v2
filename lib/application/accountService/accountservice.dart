@@ -9,7 +9,7 @@ import '../../domain/dmaccount/userdm.dart';
 import '../../domain/dmstore/storecheck.dart';
 
 class AccountService {
-  var ipAddress = "13.212.46.189";
+  var ipAddress = "18.138.51.81";
   var port = "17003";
 
   Future<Customer?> apiLogin(String login, String pswd) async {
@@ -18,7 +18,6 @@ class AccountService {
         headers: <String, String>{'content-type': 'application/json'},
         body:
             jsonEncode(<String, String>{'username': login, 'password': pswd}));
-    print(response.statusCode);
     if (response.statusCode == 200) {
       return Customer.fromJson(jsonDecode(response.body));
     } else {
@@ -40,7 +39,6 @@ class AccountService {
     });
 
     var response = await http.post(url, headers: headers, body: body);
-    print(response.statusCode);
     if (response.statusCode == 200) {
       return Register.fromJson(jsonDecode(response.body));
     } else if (response.statusCode == 409) {
@@ -66,6 +64,28 @@ class AccountService {
     }
   }
 
+  Future<Check> editpersonal(
+      String token,String username, String email, String birthday, String gender) async {
+    var response = await http.put(
+        Uri.parse('http://$ipAddress:$port/api/v1/member/edit-personal-data'),
+        headers: {'content-type': 'application/json',HttpHeaders.authorizationHeader: 'Bearer $token',},
+        body: jsonEncode(<String, dynamic>{
+          "name": username,
+          "username": email,
+          "birthday": birthday,
+          "sex": gender
+        }));
+    if (response.statusCode == 200) {
+      return Check.fromJson(jsonDecode(response.body));
+    }
+    if (response.statusCode == 400) {
+      return Check(code: response.statusCode, message: "unsuccessful");
+    } else {
+      throw Exception(
+          'เกิดข้อผิดพลาดในการร้องขอข้อมูล: ${response.statusCode}');
+    }
+  }
+
   Future<Check> deleteAccount(String token) async {
     var response = await http.delete(
       Uri.parse('http://$ipAddress:$port/api/v1/member/delete-account'),
@@ -73,7 +93,6 @@ class AccountService {
         HttpHeaders.authorizationHeader: 'Bearer $token',
       },
     );
-    print(response.statusCode);
     if (response.statusCode == 200) {
       return Check.fromJson(jsonDecode(response.body));
     }

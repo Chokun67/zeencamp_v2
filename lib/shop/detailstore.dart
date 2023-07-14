@@ -20,12 +20,20 @@ class DetailStore extends StatefulWidget {
 }
 
 class _DetailStoreState extends State<DetailStore> {
+  bool isSwitched = false;
   final String ip = AccountService().ipAddress;
   var token = "";
+  var idAccount = "";
+  var idname = "";
   @override
   void initState() {
     super.initState();
-    getData();
+    getData().then((_) {
+      AccountService().apigetpoint(token).then((value) => setState(() {
+            idAccount = value.id;
+            idname = value.name;
+          }));
+    });
   }
 
   Future<void> getData() async {
@@ -53,7 +61,8 @@ class _DetailStoreState extends State<DetailStore> {
       body: SafeArea(
           child: SingleChildScrollView(
               child: FutureBuilder(
-                  future: getData(),
+                  future: getData().then((value) =>
+                      StoresService().fetchStoreData(token, widget.idshop)),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const Center(
@@ -62,100 +71,100 @@ class _DetailStoreState extends State<DetailStore> {
                     }
                     if (snapshot.hasError) {
                       return Center(child: Text('Error: ${snapshot.error}'));
-                    }
-                    return FutureBuilder(
-                        future: StoresService()
-                            .fetchStoreData(token, widget.idshop),
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return const Center(
-                              child: CircularProgressIndicator(),
-                            );
-                          } else if (snapshot.hasError) {
-                            return Center(
-                                child:
-                                    Text('เกิดข้อผิดพลาด: ${snapshot.error}'));
-                          } else {
-                            final customerData = snapshot.data!;
-                            return Stack(children: [
-                              Mystlye().buildBackground(widthsize, heightsize,
-                                  context, "", true, 0.3),
-                              SizedBox(
-                                width: widthsize,
-                                height: heightsize * 0.35,
-                                child: customerData.storePicture.isNotEmpty
-                                    ? Image.network(
-                                        'http://$ip:17003/api/v1/util/image/${customerData.storePicture}',
-                                        fit: BoxFit.cover,
-                                      )
-                                    : Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Text("ไม่มีรูปภาพ",
-                                              style: TextStyle(
-                                                  fontSize: heightsize * 0.05,
-                                                  fontWeight: FontWeight.bold)),
-                                          SizedBox(height: heightsize * 0.1)
-                                        ],
-                                      ),
-                              ),
-                              Column(
-                                children: [
-                                  SizedBox(
-                                    width: widthsize,
-                                    height: heightsize * 0.3,
-                                  ),
-                                  Container(
-                                    width: widthsize,
-                                    height: heightsize * 0.2,
-                                    decoration: const BoxDecoration(
-                                      borderRadius: BorderRadius.only(
-                                          topLeft: Radius.circular(30),
-                                          topRight: Radius.circular(30)),
-                                      color: kWhiteF32,
-                                    ),
-                                  )
-                                ],
-                              ), //มาจากทำขอบขาว
-                              Padding(
-                                padding: EdgeInsets.all(widthsize * 0.03),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                    } else {
+                      final customerData = snapshot.data!;
+                      return Stack(children: [
+                        Mystlye().buildBackground(
+                            widthsize, heightsize, context, "", false, 0.3),
+                        SizedBox(
+                          width: widthsize,
+                          height: heightsize * 0.35,
+                          child: customerData.storePicture.isNotEmpty
+                              ? Image.network(
+                                  'http://$ip:17003/api/v1/util/image/${customerData.storePicture}',
+                                  fit: BoxFit.cover,
+                                )
+                              : Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    SizedBox(height: heightsize * 0.23),
-                                    Center(
-                                        child: boxPoint(widthsize, heightsize)),
-                                    SizedBox(height: heightsize * 0.05),
-                                    Column(children: [
-                                      detailMenu2(widthsize, heightsize,
-                                          customerData.menuStores)
-                                    ])
+                                    Text("ไม่มีรูปภาพ",
+                                        style: TextStyle(
+                                            fontSize: heightsize * 0.05,
+                                            fontWeight: FontWeight.bold)),
+                                    SizedBox(height: heightsize * 0.1)
                                   ],
                                 ),
+                        ),
+                        Column(
+                          children: [
+                            SizedBox(
+                              width: widthsize,
+                              height: heightsize * 0.3,
+                            ),
+                            Container(
+                              width: widthsize,
+                              height: heightsize * 0.2,
+                              decoration: const BoxDecoration(
+                                borderRadius: BorderRadius.only(
+                                    topLeft: Radius.circular(30),
+                                    topRight: Radius.circular(30)),
+                                color: kWhiteF32,
                               ),
-                              Positioned(
-                                  top: widthsize * 0.05,
-                                  right: widthsize * 0.03,
-                                  child: Column(children: [
-                                    btnedit(heightsize, widthsize, context),
-                                    btnaddmenu(heightsize, widthsize, context),
-                                  ])),
-                              Positioned(
-                                  top: widthsize * 0.065,
-                                  left: widthsize * 0.065,
-                                  child: IconButton(
-                                    onPressed: () {
-                                      Navigator.pop(context);
-                                    },
-                                    icon: const Icon(Icons.arrow_back_ios),
-                                    iconSize: heightsize * 0.04,
-                                    color: kDarkYellow,
-                                  ))
-                            ]);
-                          }
-                        });
+                            )
+                          ],
+                        ), //มาจากทำขอบขาว
+                        Padding(
+                          padding: EdgeInsets.all(widthsize * 0.03),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              SizedBox(height: heightsize * 0.23),
+                              Center(child: boxPoint(widthsize, heightsize)),
+                              SizedBox(height: heightsize * 0.05),
+                              Column(children: [
+                                detailMenu2(widthsize, heightsize,
+                                    customerData.menuStores)
+                              ])
+                            ],
+                          ),
+                        ),
+                        Positioned(
+                            top: widthsize * 0.05,
+                            right: widthsize * 0.03,
+                            child: Column(children: [
+                              SizedBox(
+                                width: widthsize * 0.25,
+                                height: heightsize * 0.04,
+                                child: Switch(
+                                  value: isSwitched,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      isSwitched = value;
+                                    });
+                                  },
+                                ),
+                              ),
+                              isSwitched
+                                  ? btnedit(heightsize, widthsize, context)
+                                  : Container(),
+                              SizedBox(height: heightsize * 0.01),
+                              isSwitched
+                                  ? btnaddmenu(heightsize, widthsize, context)
+                                  : Container(),
+                            ])),
+                        Positioned(
+                            top: widthsize * 0.065,
+                            left: widthsize * 0.065,
+                            child: IconButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                              icon: const Icon(Icons.arrow_back_ios),
+                              iconSize: heightsize * 0.04,
+                              color: kDarkYellow,
+                            ))
+                      ]);
+                    }
                   }))),
     );
   }
@@ -181,7 +190,7 @@ class _DetailStoreState extends State<DetailStore> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "ปอนด์แอบแซ่บ - ชลบุรี",
+              "ร้าน $idname",
               style: TextStyle(
                   color: kGray4A,
                   fontSize: heightsize * 0.026,
@@ -252,14 +261,24 @@ class _DetailStoreState extends State<DetailStore> {
                     const EdgeInsets.all(8.0), // ระยะห่างรอบด้านของแต่ละรายการ
                 child: Column(
                   children: [
-                    Container(
-                        height: heightsize * 0.14,
-                        width: widthsize * 0.44,
-                        color: Colors.green,
-                        child: Image.network(
-                          'http://$ip:17003/api/v1/util/image/${menuStore?.pictures}',
-                          fit: BoxFit.cover,
-                        )), // รูปภาพ
+                    Stack(
+                      children: [
+                        Container(
+                            height: heightsize * 0.14,
+                            width: widthsize * 0.44,
+                            color: Colors.green,
+                            child: Image.network(
+                              'http://$ip:17003/api/v1/util/image/${menuStore?.pictures}',
+                              fit: BoxFit.cover,
+                            )),
+                        isSwitched
+                            ? Positioned(
+                                right: 0,
+                                child: btndelete(
+                                    heightsize, widthsize, menuStore!.id))
+                            : Container()
+                      ],
+                    ), // รูปภาพ
                     Text(
                       "ชื่อ ${menuStore!.nameMenu}", // ข้อความบรรทัดที่ 1
                     ),
@@ -313,7 +332,7 @@ class _DetailStoreState extends State<DetailStore> {
       );
 
   Widget btnedit(heightsize, widthsize, context) => SizedBox(
-        width: widthsize * 0.3,
+        width: widthsize * 0.25,
         height: heightsize * 0.04,
         child: ElevatedButton(
           onPressed: () async {
@@ -339,7 +358,7 @@ class _DetailStoreState extends State<DetailStore> {
       );
 
   Widget btnaddmenu(heightsize, widthsize, context) => SizedBox(
-        width: widthsize * 0.3,
+        width: widthsize * 0.25,
         height: heightsize * 0.04,
         child: ElevatedButton(
           onPressed: () async {
@@ -363,4 +382,11 @@ class _DetailStoreState extends State<DetailStore> {
           ),
         ),
       );
+
+  Widget btndelete(heightsize, widthsize, idMenu) => InkWell(
+      onTap: () async {
+        await StoresService().deleteMenu(token, idMenu);
+        setState(() {});
+      },
+      child: Icon(Icons.delete, size: widthsize * 0.08, color: Colors.red));
 }
