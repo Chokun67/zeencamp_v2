@@ -20,7 +20,7 @@ class StoresService {
         HttpHeaders.authorizationHeader: 'Bearer $token',
       },
     );
-    print(response.statusCode);
+    print(jsonDecode(response.body));
     if (response.statusCode == 200) {
       var decodeutf8 = utf8.decode(response.bodyBytes);
       final List<dynamic> jsonList = jsonDecode(decodeutf8);
@@ -31,7 +31,7 @@ class StoresService {
       List<Allstore> stores = [];
       return stores;
     } else {
-      throw Exception('Failed to fetch stores');
+      throw Exception('${response.statusCode}');
     }
   }
 
@@ -178,8 +178,7 @@ class StoresService {
         HttpHeaders.authorizationHeader: 'Bearer $token',
       },
     );
-
-    print(response.statusCode);
+    debugPrint(response.statusCode.toString());
     if (response.statusCode == 200) {
       return Check.fromJson(jsonDecode(response.body));
     } else {
@@ -196,7 +195,7 @@ class StoresService {
         HttpHeaders.authorizationHeader: 'Bearer $token',
       },
     );
-    print(response.statusCode);
+    debugPrint(response.statusCode.toString());
     if (response.statusCode == 200) {
       var decodeutf8 = utf8.decode(response.bodyBytes);
       final List<dynamic> jsonList = jsonDecode(decodeutf8);
@@ -213,19 +212,19 @@ class StoresService {
 
   Future<List<PaymentList?>> getPaymentList(token) async {
     final response = await http.get(
-      Uri.parse('http://$ipAddress:$port/api/v1/secure/payment/get-payment-list'),
+      Uri.parse(
+          'http://$ipAddress:$port/api/v1/secure/payment/get-payment-list'),
       headers: {
         'content-type': 'application/json',
         HttpHeaders.authorizationHeader: 'Bearer $token',
       },
     );
-    print(response.statusCode);
+    debugPrint("ซื้อพ้อย ${jsonDecode(response.body)}");
     if (response.statusCode == 200) {
-      // final data = jsonDecode(response.body) as List<dynamic>;
-      // return data.map((item) => PaymentList.fromJson(item)).toList();
       List<dynamic> jsonData = jsonDecode(response.body);
       List<PaymentList> data =
           jsonData.map((json) => PaymentList.fromJson(json)).toList();
+
       return data;
     } else {
       return [];
@@ -233,20 +232,43 @@ class StoresService {
   }
 
   Future<Check> buyPaymentConfirm(
-      String token, String idpayment, String pswd) async {
+      String token, String idpayment, int amount, String pswd) async {
     var response = await http.post(
         Uri.parse(
             'http://$ipAddress:$port/api/v1/secure/payment/buy-payment-confirm'),
         headers: {
+          'content-type': 'application/json',
           HttpHeaders.authorizationHeader: 'Bearer $token',
         },
-        body: jsonEncode(
-            <String, String>{'id': idpayment, 'password': pswd}));
-    print(response.statusCode);
+        body: jsonEncode(<String, dynamic>{
+          'idPayment': idpayment,
+          'amount': amount,
+          'pass': pswd
+        }));
+
+    debugPrint("ซื้อพ้อยเซิฟเวอ" + response.statusCode.toString());
     if (response.statusCode == 200) {
       return Check.fromJson(jsonDecode(response.body));
     } else {
       return Check(code: response.statusCode, message: "message");
+    }
+  }
+
+  Future<Check> updatelocation(String token, String location) async {
+    var response = await http.post(
+        Uri.parse('http://$ipAddress:$port/api/v1/stores/update-location'),
+        headers: {
+          'content-type': 'application/json',
+          HttpHeaders.authorizationHeader: 'Bearer $token',
+        },
+        body: jsonEncode(<String, String>{'location': location}));
+    debugPrint("data"+location);
+    debugPrint("position " + response.statusCode.toString());
+    if (response.statusCode == 200) {
+      return Check.fromJson(jsonDecode(response.body));
+    } else {
+      print(jsonDecode(response.body).toString());
+      return Check(code: response.statusCode, message: "");
     }
   }
 }

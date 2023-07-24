@@ -28,11 +28,6 @@ class _HistoryState extends State<History> {
     super.initState();
     // token = context.read<AppData>().token;
     getData().then((_) {
-      AccountService().apigetpoint(token).then((value) => setState(() {
-            pointid = value.point;
-            idAccount = value.id;
-            idname = value.name;
-          }));
       fetchData();
     });
   }
@@ -40,6 +35,11 @@ class _HistoryState extends State<History> {
   Future<void> getData() async {
     token = await SecureStorage().read("token") as String;
     idAccount = await SecureStorage().read("idAccount") as String;
+  }
+
+  Future<void> getpoint() async {
+    await AccountService().apigetpoint(token).then((value) =>
+        {pointid = value.point, idAccount = value.id, idname = value.name});
   }
 
   void fetchData() async {
@@ -54,28 +54,40 @@ class _HistoryState extends State<History> {
   Widget build(BuildContext context) {
     final heightsize = MediaQuery.of(context).size.height;
     final widthsize = MediaQuery.of(context).size.width;
-    return Scaffold(
-      body: SafeArea(
-          child: Stack(children: [
-        Mystlye().buildBackground(
-            widthsize, heightsize, context, "ประวัติ", true, 0.22),
-        Padding(
-          padding: EdgeInsets.all(widthsize * 0.03),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(height: heightsize * 0.15),
-              Center(child: showPoint(widthsize, heightsize)),
-              SizedBox(height: heightsize * 0.05),
-              SizedBox(
-                  width: widthsize,
-                  height: heightsize - heightsize * 0.5,
-                  child: historyPointTranfer(widthsize, heightsize, context))
-            ],
-          ),
-        ),
-      ])),
-    );
+    return FutureBuilder(
+        future: getData().then((value) => getpoint()),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Mystlye().waitfuture();
+          }
+          if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else {
+            return Scaffold(
+              body: SafeArea(
+                  child: Stack(children: [
+                Mystlye().buildBackground(
+                    widthsize, heightsize, context, "ประวัติ", true, 0.22),
+                Padding(
+                  padding: EdgeInsets.all(widthsize * 0.03),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(height: heightsize * 0.15),
+                      Center(child: showPoint(widthsize, heightsize)),
+                      SizedBox(height: heightsize * 0.05),
+                      SizedBox(
+                          width: widthsize,
+                          height: heightsize - heightsize * 0.5,
+                          child: historyPointTranfer(
+                              widthsize, heightsize, context))
+                    ],
+                  ),
+                ),
+              ])),
+            );
+          }
+        });
   }
 
   Widget showPoint(widthsize, heightsize) => Container(
@@ -133,6 +145,8 @@ class _HistoryState extends State<History> {
             shrinkWrap: true,
             itemBuilder: (BuildContext buildList, int index) {
               history.sort((a, b) => b.date.compareTo(a.date));
+              DateFormat dateTimeFormat = DateFormat('dd/MM/yyyy HH:mm:ss');
+
               return InkWell(
                 onTap: () {
                   TranferService()
@@ -149,7 +163,7 @@ class _HistoryState extends State<History> {
                                               state: history[index].state,
                                               payee: history[index].opposite,
                                               payeename: value.payee,
-                                              date: "${history[index].date}",
+                                              date: dateTimeFormat.format(history[index].date),
                                               point: history[index].point,
                                               balance: pointid,
                                             )))
@@ -179,7 +193,7 @@ class _HistoryState extends State<History> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text("${history[index].date}",
+                          Text(dateTimeFormat.format(history[index].date),
                               style: TextStyle(fontSize: heightsize * 0.02)),
                           Text(
                             isDeposit(history, index)

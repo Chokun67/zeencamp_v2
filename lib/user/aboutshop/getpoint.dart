@@ -65,7 +65,7 @@ class _GetPointState extends State<GetPoint> {
               boxPoint(widthsize, heightsize),
               getOrGive(widthsize, heightsize),
               detailTrandfer(widthsize, heightsize),
-              beta(heightsize, widthsize, context)
+              buttonbeta(heightsize, widthsize, context)
             ],
           ),
         ),
@@ -196,7 +196,7 @@ class _GetPointState extends State<GetPoint> {
         ),
       );
 
-  Widget beta(double heightsize, double widthsize, BuildContext context) =>
+  Widget buttonbeta(double heightsize, double widthsize, BuildContext context) =>
       SizedBox(
         width: widthsize * 0.7,
         height: heightsize * 0.055,

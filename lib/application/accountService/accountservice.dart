@@ -9,7 +9,7 @@ import '../../domain/dmaccount/userdm.dart';
 import '../../domain/dmstore/storecheck.dart';
 
 class AccountService {
-  var ipAddress = "18.138.51.81";
+  var ipAddress = "13.212.167.80";
   var port = "17003";
 
   Future<Customer?> apiLogin(String login, String pswd) async {
@@ -26,7 +26,7 @@ class AccountService {
   }
 
   Future<Register?> apiRegister(String login, String username, String pswd,
-      String date, String gender) async {
+      String date, String gender,String identifier) async {
     var url = Uri.parse('http://$ipAddress:$port/api/v1/member/register');
     var headers = {'Content-Type': 'application/json'};
 
@@ -35,7 +35,8 @@ class AccountService {
       "username": login,
       "password": pswd,
       "birthday": date,
-      "sex": gender
+      "sex": gender,
+      "imei":identifier
     });
 
     var response = await http.post(url, headers: headers, body: body);
@@ -114,7 +115,7 @@ class AccountService {
           'birthday': birthday,
           'newPassword': newpassword
         }));
-    print(response.statusCode);
+    
     if (response.statusCode == 200) {
       return Check.fromJson(jsonDecode(response.body));
     }

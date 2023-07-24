@@ -1,7 +1,7 @@
 class PaymentList {
   final String id;
-  final String price;
-  final String point;
+  final double price;
+  final int point;
 
   PaymentList({
     required this.id,

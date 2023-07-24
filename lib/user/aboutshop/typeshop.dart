@@ -98,6 +98,8 @@ class _ShopTypeState extends State<ShopType> {
     );
   }
 
+  double currentLat = 13.7563; // ละติจูดของตำแหน่งปัจจุบัน
+  double currentLon = 100.5018;
   Widget adviseShop(widthsize, heightsize, int type) {
     List<Allstore> stores;
     if (type == 1) {
@@ -123,8 +125,25 @@ class _ShopTypeState extends State<ShopType> {
                   physics: const ScrollPhysics(parent: null),
                   shrinkWrap: true,
                   itemBuilder: (context, index) {
-                    Allstore store = stores[
-                        index]; // Access the item in stores using the index
+                    stores.sort((a, b) {
+                      double distanceToA = calculateDistance(
+                          currentLat,
+                          currentLon,
+                          extractLoca(a.location, 0),
+                          extractLoca(a.location, 1));
+                      double distanceToB = calculateDistance(
+                          currentLat,
+                          currentLon,
+                          extractLoca(b.location, 0),
+                          extractLoca(b.location, 1));
+                      return distanceToA.compareTo(distanceToB);
+                    });
+                    Allstore store = stores[index];
+                    double distanceToStore = calculateDistance(
+                        currentLat,
+                        currentLon,
+                        extractLoca(store.location, 0),
+                        extractLoca(store.location, 1));
                     return Padding(
                       padding: EdgeInsets.only(right: widthsize * 0.05),
                       child: InkWell(
@@ -143,32 +162,34 @@ class _ShopTypeState extends State<ShopType> {
                           children: [
                             Container(
                               decoration: const BoxDecoration(
-                                color: Colors.redAccent,
                                 borderRadius:
                                     BorderRadius.all(Radius.circular(15)),
                               ),
                               height: heightsize * 0.14,
                               width: widthsize * 0.38,
-                              child: store.storePicture.isNotEmpty
-                                  ? Image.network(
-                                      'http://$ip:17003/api/v1/util/image/${store.storePicture}',
-                                      fit: BoxFit.cover,
-                                    )
-                                  : Container(),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(15),
+                                child: store.storePicture.isNotEmpty
+                                    ? Image.network(
+                                        'http://$ip:17003/api/v1/util/image/${store.storePicture}',
+                                        fit: BoxFit.cover,
+                                      )
+                                    : Container(),
+                              ),
                             ),
                             Text(
                               "ร้าน ${store.name}",
                               style: TextStyle(
-                                color: const Color(0xFFEB3F3F),
-                                fontSize: heightsize * 0.015,
+                                color: const Color(0xFF4A4A4A),
+                                fontSize: heightsize * 0.016,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
                             Text(
-                              "id ${store.id}",
+                              "${distanceToStore.toStringAsFixed(2)} ก.ม.",
                               style: TextStyle(
-                                color: const Color(0xFFEB3F3F),
-                                fontSize: heightsize * 0.015,
+                                color: const Color(0xFF4A4A4A),
+                                fontSize: heightsize * 0.016,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),

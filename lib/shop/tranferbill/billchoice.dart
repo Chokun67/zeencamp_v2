@@ -42,44 +42,60 @@ class _BillChoiceState extends State<BillChoice> {
     idAccount = await SecureStorage().read("idAccount") as String;
   }
 
+  Future<void> getpoint() async {
+    await AccountService().apigetpoint(token).then((value) =>
+        {pointid = value.point, idAccount = value.id, idname = value.name});
+  }
+
   @override
   Widget build(BuildContext context) {
     final heightsize = MediaQuery.of(context).size.height -
         MediaQuery.of(context).padding.vertical;
     final widthsize = MediaQuery.of(context).size.width;
-    return Scaffold(
-      body: SafeArea(
-          child: SingleChildScrollView(
-        child: Stack(children: [
-          Mystlye().buildBackground(
-              widthsize, heightsize, context, "สร้างบิล", true, 0.22),
-          Container(
-            height: heightsize,
-            padding: EdgeInsets.all(widthsize * 0.03),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  SizedBox(height: heightsize * 0.15),
-                  Center(child: showPoint(widthsize, heightsize)),
-                  Expanded(
-                    child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
+    return FutureBuilder(
+        future: getData().then((value) => getpoint()),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Mystlye().waitfuture();
+          }
+          if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else {
+            return Scaffold(
+              body: SafeArea(
+                  child: SingleChildScrollView(
+                child: Stack(children: [
+                  Mystlye().buildBackground(
+                      widthsize, heightsize, context, "สร้างบิล", true, 0.22),
+                  Container(
+                    height: heightsize,
+                    padding: EdgeInsets.all(widthsize * 0.03),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          goReceive(widthsize, heightsize),
-                          SizedBox(height: heightsize * 0.04),
-                          goExchange(widthsize, heightsize),
-                          SizedBox(height: heightsize * 0.1),
-                        ]),
+                          SizedBox(height: heightsize * 0.15),
+                          Center(child: showPoint(widthsize, heightsize)),
+                          Expanded(
+                            child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  goReceive(widthsize, heightsize),
+                                  SizedBox(height: heightsize * 0.04),
+                                  goExchange(widthsize, heightsize),
+                                  SizedBox(height: heightsize * 0.1),
+                                ]),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                ],
-              ),
-            ),
-          ),
-        ]),
-      )),
-    );
+                ]),
+              )),
+            );
+          }
+        });
   }
 
   Widget showPoint(widthsize, heightsize) => Container(

@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import '../background.dart/appstyle.dart';
+import 'dart:math';
+
+import '../shop/menushop.dart';
+import '../user/menu_user.dart';
 
 class Mystlye {
   SafeArea buildBackground(double widthsize, double heightsize, context,
@@ -37,15 +42,15 @@ class Mystlye {
           ),
           back
               ? Positioned(
-            top: widthsize * 0.055,
-            left: widthsize * 0.055,
-            child: IconButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              icon: const Icon(Icons.arrow_back_ios),
-              iconSize: heightsize*0.04,
-            ))
+                  top: widthsize * 0.055,
+                  left: widthsize * 0.055,
+                  child: IconButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    icon: const Icon(Icons.arrow_back_ios),
+                    iconSize: heightsize * 0.04,
+                  ))
               : const SizedBox.shrink(),
           Positioned(
               top: widthsize * 0.13,
@@ -55,14 +60,24 @@ class Mystlye {
                   child: Text(
                     title,
                     style: TextStyle(
-                    color: kGray4A,
-                    fontSize: heightsize * 0.05,
-                    fontWeight: FontWeight.bold),
+                        color: kGray4A,
+                        fontSize: heightsize * 0.05,
+                        fontWeight: FontWeight.bold),
                   ),
                 ),
               ))
         ],
       ),
+    );
+  }
+
+  SafeArea waitfuture() {
+    return const SafeArea(
+      child: Scaffold(
+        backgroundColor: kWhite,
+          body: Center(
+        child: CircularProgressIndicator(),
+      )),
     );
   }
 }
@@ -115,4 +130,61 @@ void showAlertDecide(BuildContext context,
       );
     },
   );
+}
+
+double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+  const double earthRadius = 6371; // รัศมีของโลกในหน่วยกิโลเมตร
+  double dLat = _toRadians(lat2 - lat1);
+  double dLon = _toRadians(lon2 - lon1);
+
+  double a = pow(sin(dLat / 2), 2) +
+      cos(_toRadians(lat1)) * cos(_toRadians(lat2)) * pow(sin(dLon / 2), 2);
+  double c = 2 * atan2(sqrt(a), sqrt(1 - a));
+
+  double distance = earthRadius * c;
+  return distance;
+}
+
+double _toRadians(double degree) {
+  return degree * pi / 180;
+}
+
+double extractLoca(String a, int b) {
+  RegExp regex = RegExp(r',');
+  List<String> array = a.split(regex);
+  return double.parse(array[b].trim());
+  // List<String> parts = a.substring(0, a.length - 1).split(",");
+}
+
+Future<Position> getgeoloca() async {
+  bool serviceEnable = await Geolocator.isLocationServiceEnabled();
+  if (!serviceEnable) {
+    Future.error("Location are disable");
+  }
+
+  LocationPermission permission = await Geolocator.checkPermission();
+  if (permission == LocationPermission.denied) {
+    permission = await Geolocator.requestPermission();
+    if (permission == LocationPermission.denied) {
+      return Future.error(
+          "Location persossons are permanently denied, we cannot request");
+    }
+  }
+  return await Geolocator.getCurrentPosition();
+}
+
+void gomenu(context,isstore){
+  if (isstore == "true") {
+          Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => const MenuShop()),
+              (route) => false,
+            );
+        } else {
+          Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => const MenuUser()),
+              (route) => false,
+            );
+        }
 }

@@ -61,26 +61,29 @@ class _SearchShopState extends State<SearchShop> {
     final heightsize = MediaQuery.of(context).size.height;
     final widthsize = MediaQuery.of(context).size.width;
     return Scaffold(
+      backgroundColor: kWhiteF32,
       body: SafeArea(
-          child: Stack(children: [
-        Mystlye().buildBackground(
-            widthsize, heightsize, context, "ร้านนค้า", true, 0.25),
-        Padding(
-          padding: EdgeInsets.all(widthsize * 0.03),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(height: heightsize * 0.25),
-              allShop(widthsize, heightsize)
-            ],
-          ),
-        ),
-        Positioned(
-            top: heightsize * 0.15,
-            child: SizedBox(
-                width: widthsize,
-                child: Center(child: fieldSearchType(widthsize, heightsize))))
-      ])),
+          child: SingleChildScrollView(
+            child: Stack(children: [
+                  Mystlye().buildBackground(
+              widthsize, heightsize- MediaQuery.of(context).padding.vertical, context, "ร้านค้า", true, 0.26),
+                  Padding(
+            padding: EdgeInsets.all(widthsize * 0.03),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(height: heightsize * 0.25),
+                allShop(widthsize, heightsize)
+              ],
+            ),
+                  ),
+                  Positioned(
+              top: heightsize * 0.15,
+              child: SizedBox(
+                  width: widthsize,
+                  child: Center(child: fieldSearchType(widthsize, heightsize))))
+                ]),
+          )),
     );
   }
 
@@ -115,17 +118,25 @@ class _SearchShopState extends State<SearchShop> {
                     children: [
                       displayList[index].storePicture.isNotEmpty
                           ? Container(
-                            height: heightsize * 0.14,
+                              height: heightsize * 0.14,
                               width: widthsize * 0.44,
-                            child: Image.network(
-                                'http://$ip:17003/api/v1/util/image/${displayList[index].storePicture}',
-                                fit: BoxFit.cover,
+                              decoration: const BoxDecoration(
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(15)),
                               ),
-                          )
+                              child: ClipRRect(
+                                borderRadius:
+                                    const BorderRadius.all(Radius.circular(15)),
+                                child: Image.network(
+                                  'http://$ip:17003/api/v1/util/image/${displayList[index].storePicture}',
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                            )
                           : Container(
                               height: heightsize * 0.14,
                               width: widthsize * 0.44,
-                              color: Colors.green), 
+                              color: Colors.green),
                       Text("ร้าน ${displayList[index].name}",
                           style: mystyleText(heightsize, 0.02, kGray4A, false)),
                       Text(

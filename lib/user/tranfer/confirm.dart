@@ -212,10 +212,5 @@ class _ConfirmTranferState extends State<ConfirmTranfer> {
               else
                 {showAlertBox(context, 'แจ้งเตือน', 'เกิดข้อผิดพลาดในการโอน')}
             });
-
-    // Navigator.push(context,
-    //     MaterialPageRoute(builder: (context) => const ReceiptPage(idAccount: "", message: "", state: "", payee: "", date: "", point: 300, balance: 300)));
-    // Navigator.push(
-    //     context, MaterialPageRoute(builder: (context) => const ReceiptPage()));
   }
 }

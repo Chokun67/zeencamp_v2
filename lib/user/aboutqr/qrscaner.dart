@@ -108,7 +108,7 @@ class _QrScanerState extends State<QrScaner> {
                 if (value != null)
                   {
                     print("wtf 1"),
-                    Navigator.push(
+                    Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
                             builder: (context) => QrTranFer(idstore: qrText)))

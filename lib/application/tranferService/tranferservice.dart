@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 import 'dart:async';
 import 'dart:convert';
@@ -67,7 +68,7 @@ class TranferService {
 
   Future<String?> buildqrcodeformenu(
       String token, Map<String, int> data, bool isreceive) async {
-    print(isreceive.toString());
+
     var requestData = {
       'state': isreceive ? "RECEIVE" : "EXCHANGE",
       'menu': data,
@@ -80,7 +81,7 @@ class TranferService {
           HttpHeaders.authorizationHeader: 'Bearer $token',
         },
         body: jsonEncode(requestData));
-    print(response.statusCode);
+    
     if (response.statusCode == 200) {
       var json = jsonDecode(response.body);
       return json['hash'] as String;
@@ -98,19 +99,19 @@ class TranferService {
         HttpHeaders.authorizationHeader: 'Bearer $token',
       },
     );
+    debugPrint("ซื้อพ้อย ${jsonDecode(response.body)}");
     if (response.statusCode == 200) {
       var decodeutf8 = utf8.decode(response.bodyBytes);
       final Map<String, dynamic> jsonData = jsonDecode(decodeutf8);
-
       final storeData = Qrhash(
           amount: jsonData.containsKey('amount') &&
                   jsonData['amount'] !=
                       null //ตรวจสอบว่ามีkeyชื่อ storePictureละรูปภาพเป็น null
               ? jsonData['amount']
               : 0,
-          menuStores: jsonData.containsKey('idMenu')
+          menuStores: jsonData.containsKey('menu')
               ? List<MenuList>.from(
-                  jsonData['idMenu'].map((x) => MenuList.fromJson(x)))
+                  jsonData['menu'].map((x) => MenuList.fromJson(x)))
               : []);
       return storeData;
     } else if (response.statusCode == 404) {

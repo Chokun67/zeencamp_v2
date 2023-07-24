@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:zeencamp_v2/background.dart/appstyle.dart';
+import 'package:zeencamp_v2/background.dart/background.dart';
+
+import '../../background.dart/securestorage.dart';
 
 class ReceiptPage extends StatefulWidget {
   const ReceiptPage(
@@ -26,61 +29,78 @@ class ReceiptPage extends StatefulWidget {
 }
 
 class _ReceiptPageState extends State<ReceiptPage> {
+  String isstore = "";
+  @override
+  void initState() {
+    super.initState();
+    getData();
+  }
+
+  Future<void> getData() async {
+    isstore = await SecureStorage().read("isstore") as String;
+  }
+
   @override
   Widget build(BuildContext context) {
     final heightsize = MediaQuery.of(context).size.height;
     final widthsize = MediaQuery.of(context).size.width;
-    return Scaffold(
-      body: SafeArea(
-          child: Stack(
-        children: [
-          Container(
-            height: heightsize,
-            width: widthsize,
-            color: kWhite,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                SizedBox(height: heightsize * 0.07),
-                Container(
-                  decoration: const BoxDecoration(
-                    borderRadius: BorderRadius.all(Radius.circular(15)),
-                    color: kGrayD9,
+    return WillPopScope(
+      onWillPop: () async {
+        gomenu(context, isstore);
+        return false;
+      },
+      child: Scaffold(
+        body: SafeArea(
+            child: Stack(
+          children: [
+            Container(
+              height: heightsize,
+              width: widthsize,
+              color: kWhite,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  SizedBox(height: heightsize * 0.07),
+                  Container(
+                    decoration: const BoxDecoration(
+                      borderRadius: BorderRadius.all(Radius.circular(15)),
+                      color: kGrayD9,
+                    ),
+                    height: heightsize * 0.63,
+                    width: widthsize * 0.91,
+                    child: Column(
+                      children: [
+                        SizedBox(height: heightsize * 0.02),
+                        success(widthsize, heightsize),
+                        SizedBox(height: heightsize * 0.02),
+                        confirmBox(widthsize, heightsize),
+                        SizedBox(height: heightsize * 0.04),
+                        confirmMoney(widthsize, heightsize),
+                      ],
+                    ),
                   ),
-                  height: heightsize * 0.63,
-                  width: widthsize * 0.91,
-                  child: Column(
-                    children: [
-                      SizedBox(height: heightsize * 0.02),
-                      success(widthsize, heightsize),
-                      SizedBox(height: heightsize * 0.02),
-                      confirmBox(widthsize, heightsize),
-                      SizedBox(height: heightsize * 0.04),
-                      confirmMoney(widthsize, heightsize),
-                    ],
+                ],
+              ),
+            ),
+            Positioned(
+                child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    "ยอดคงเหลือ : ${NumberFormat("#,##0").format(widget.balance)}",
+                    style: mystyleText(heightsize, 0.02, kGray4A, false),
                   ),
-                ),
-              ],
-            ),
-          ),
-          Positioned(
-              child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.end,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Text(
-                  "ยอดคงเหลือ : ${NumberFormat("#,##0").format(widget.balance)}",
-                  style: mystyleText(heightsize, 0.02, kGray4A, false),
-                ),
-                SizedBox(height: heightsize * 0.02),
-                cancelPageButton(heightsize, widthsize, context),
-                SizedBox(height: heightsize * 0.05)
-              ],
-            ),
-          ))
-        ],
-      )),
+                  SizedBox(height: heightsize * 0.02),
+                  cancelPageButton(heightsize, widthsize, context),
+                  SizedBox(height: heightsize * 0.05)
+                ],
+              ),
+            ))
+          ],
+        )),
+      ),
     );
   }
 
@@ -158,8 +178,7 @@ class _ReceiptPageState extends State<ReceiptPage> {
         height: heightsize * 0.055,
         child: ElevatedButton(
           onPressed: () {
-            Navigator.pop(context);
-            Navigator.pop(context);
+            gomenu(context, isstore);
           },
           style: ElevatedButton.styleFrom(
               backgroundColor: kYellow,

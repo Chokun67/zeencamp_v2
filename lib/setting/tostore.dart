@@ -61,10 +61,6 @@ class _ToStoreState extends State<ToStore> {
   void initState() {
     super.initState();
     getData();
-    getgeoloca().then((value) => {
-          print("${value.latitude},${value.longitude}"),
-          currentlocation = "${value.latitude},${value.longitude}",
-        });
   }
 
   Future<void> getData() async {
@@ -113,7 +109,7 @@ class _ToStoreState extends State<ToStore> {
   Widget deTail(widthsize, heightsize, context) => Center(
         child: Container(
           padding: EdgeInsets.only(top: heightsize * 0.1),
-          height: heightsize * 0.7,
+          height: heightsize * 0.8,
           width: widthsize,
           child: Form(
             key: _formKey,
@@ -122,9 +118,10 @@ class _ToStoreState extends State<ToStore> {
                 children: [
                   imageHere(widthsize),
                   iconPickPicture(widthsize),
-                  Text("เลือกพิกัดร้านค้า:\n$storeLocation",style: mystyleText(heightsize, 0.02, kGray4A, true)),
-                  Text("ระยะห่าง:\n$storeLocation",style: mystyleText(heightsize, 0.02, kGray4A, true)),
-                  Text("ตำแหน่งปัจจุบัน$currentlocation",style: mystyleText(heightsize, 0.02, kGray4A, true)),
+                  Text("เลือกพิกัดร้านค้า:\n$storeLocation",
+                      style: mystyleText(heightsize, 0.02, kGray4A, true)),
+                  Text("ตำแหน่งปัจจุบัน$currentlocation",
+                      style: mystyleText(heightsize, 0.02, kGray4A, true)),
                   picklatlng(heightsize, widthsize),
                   btnToStore(heightsize, widthsize),
                 ]),
@@ -200,17 +197,22 @@ class _ToStoreState extends State<ToStore> {
       );
   void btnchange() {
     if (file != null) {
-      StoresService().apiSettostore(token, idAccount).then((value) => {
-            StoresService()
-                .setStoreimage(token, bit)
-                .then((value) => // SecureStorage().deleteAll(),
-                    Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const LoginPage()),
-                      (route) => false,
-                    ))
-          });
+      if (storeLocation != "") {
+        StoresService().apiSettostore(token, idAccount).then((value) => {
+          StoresService().updatelocation(token, storeLocation),
+              StoresService()
+                  .setStoreimage(token, bit)
+                  .then((value) => // SecureStorage().deleteAll(),
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const LoginPage()),
+                        (route) => false,
+                      ))
+            });
+      } else {
+        showAlertBox(context, "แจ้งเตือน", "กรุณาเลือกตำแหน่งร้านค้า");
+      }
     } else {
       showAlertBox(context, "แจ้งเตือน", "กรุณาใส่รูปภาพ");
     }

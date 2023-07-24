@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:zeencamp_v2/shop/addmenu.dart';
+import 'package:zeencamp_v2/shop/detail/addmenu.dart';
+import 'package:zeencamp_v2/shop/map/select.dart';
 
-import '../../background.dart/appstyle.dart';
-import '../../background.dart/background.dart';
-import '../application/accountService/accountservice.dart';
-import '../application/shopService/shopservice.dart';
-import '../background.dart/securestorage.dart';
-import '../domain/dmstore/detailshopdm.dart';
+import '../../../background.dart/appstyle.dart';
+import '../../../background.dart/background.dart';
+import '../../application/accountService/accountservice.dart';
+import '../../application/shopService/shopservice.dart';
+import '../../background.dart/securestorage.dart';
+import '../../domain/dmstore/detailshopdm.dart';
 import 'editimage.dart';
 
 class DetailStore extends StatefulWidget {
@@ -42,17 +43,6 @@ class _DetailStoreState extends State<DetailStore> {
 
   @override
   Widget build(BuildContext context) {
-    // List<Map<String, dynamic>> yourData = [
-    //   {
-    //     'line1': 'ข้อความบรรทัดที่ 1',
-    //     'line2': 'ข้อความบรรทัดที่ 2',
-    //   },
-    //   {
-    //     'line1': 'ข้อความบรรทัดที่ 1',
-    //     'line2': 'ข้อความบรรทัดที่ 2',
-    //   },
-    // ];
-
     final heightsize = MediaQuery.of(context).size.height -
         MediaQuery.of(context).padding.vertical;
     final widthsize = MediaQuery.of(context).size.width;
@@ -151,6 +141,10 @@ class _DetailStoreState extends State<DetailStore> {
                               isSwitched
                                   ? btnaddmenu(heightsize, widthsize, context)
                                   : Container(),
+                              SizedBox(height: heightsize * 0.01),
+                              isSwitched
+                                  ? btnlocation(heightsize, widthsize, context)
+                                  : Container(),
                             ])),
                         Positioned(
                             top: widthsize * 0.065,
@@ -209,39 +203,39 @@ class _DetailStoreState extends State<DetailStore> {
         ),
       );
 
-  Widget detailMenu(widthsize, heightsize, yourData) => SingleChildScrollView(
-        child: Column(children: [
-          GridView.builder(
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              childAspectRatio: 1,
-            ),
-            physics: const ScrollPhysics(parent: null),
-            shrinkWrap: true,
-            itemCount: yourData.length, // จำนวนรายการข้อมูลใน GridView
-            itemBuilder: (BuildContext context, int index) {
-              return Container(
-                margin:
-                    const EdgeInsets.all(8.0), // ระยะห่างรอบด้านของแต่ละรายการ
-                child: Column(
-                  children: [
-                    Container(
-                        height: heightsize * 0.14,
-                        width: widthsize * 0.44,
-                        color: Colors.green), // รูปภาพ
-                    Text(
-                      yourData[index]['line1'], // ข้อความบรรทัดที่ 1
-                    ),
-                    Text(
-                      yourData[index]['line2'], // ข้อความบรรทัดที่ 2
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
-        ]),
-      );
+  // Widget detailMenu(widthsize, heightsize, yourData) => SingleChildScrollView(
+  //       child: Column(children: [
+  //         GridView.builder(
+  //           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+  //             crossAxisCount: 2,
+  //             childAspectRatio: 1,
+  //           ),
+  //           physics: const ScrollPhysics(parent: null),
+  //           shrinkWrap: true,
+  //           itemCount: yourData.length, // จำนวนรายการข้อมูลใน GridView
+  //           itemBuilder: (BuildContext context, int index) {
+  //             return Container(
+  //               margin:
+  //                   const EdgeInsets.all(8.0), // ระยะห่างรอบด้านของแต่ละรายการ
+  //               child: Column(
+  //                 children: [
+  //                   Container(
+  //                       height: heightsize * 0.14,
+  //                       width: widthsize * 0.44,
+  //                       color: Colors.green), // รูปภาพ
+  //                   Text(
+  //                     yourData[index]['line1'], // ข้อความบรรทัดที่ 1
+  //                   ),
+  //                   Text(
+  //                     yourData[index]['line2'], // ข้อความบรรทัดที่ 2
+  //                   ),
+  //                 ],
+  //               ),
+  //             );
+  //           },
+  //         ),
+  //       ]),
+  //     );
 
   Widget detailMenu2(widthsize, heightsize, List<Store>? menuStores) =>
       SingleChildScrollView(
@@ -349,6 +343,43 @@ class _DetailStoreState extends State<DetailStore> {
               shape: const StadiumBorder()),
           child: Text(
             "แก้ไขรูป",
+            style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: heightsize * 0.02),
+          ),
+        ),
+      );
+
+  Widget btnlocation(heightsize, widthsize, context) => SizedBox(
+        width: widthsize * 0.25,
+        height: heightsize * 0.04,
+        child: ElevatedButton(
+          onPressed: () async {
+            await getgeoloca().then((value) => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => MyMap(
+                            geolocation:
+                                "${value.latitude},${value.longitude}")))
+                .then((value) => {
+                      if (value != "")
+                        {
+                          StoresService().updatelocation(token, "1.1,1.1"),
+                          print(value)
+                        }
+                    }));
+            setState(() {});
+          },
+          style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF4A4A4A),
+              side: const BorderSide(
+                color: Color(0xFFAD6800),
+                width: 1,
+              ),
+              shape: const StadiumBorder()),
+          child: Text(
+            "แก้ไขที่อยู่",
             style: TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,

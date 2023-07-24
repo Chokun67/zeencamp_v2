@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:zeencamp_v2/shop/menushop.dart';
 import 'package:zeencamp_v2/user/menu_user.dart';
@@ -9,6 +10,7 @@ import '../background.dart/appstyle.dart';
 import '../background.dart/securestorage.dart';
 import '../domain/pvd_data.dart';
 import 'forgotpassword.dart';
+import 'package:unique_identifier/unique_identifier.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -23,6 +25,17 @@ class _LoginPageState extends State<LoginPage> {
   final _ctrlPswd = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool isvalid = true;
+  ////////////////////////////
+  String _identifier = 'Unknown';
+
+ 
+
+  @override
+  void initState() {
+    super.initState();
+    initUniqueIdentifierState().then((_) => SecureStorage().write('imei', _identifier),);
+  }
+
   @override
   Widget build(BuildContext context) {
     final heightsize = MediaQuery.of(context).size.height;
@@ -30,8 +43,8 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
       body: SafeArea(
           child: SingleChildScrollView(
-            child: Stack(
-                  children: [
+        child: Stack(
+          children: [
             Container(
               padding: EdgeInsets.all(widthsize * 0.08),
               height: heightsize - MediaQuery.of(context).padding.vertical,
@@ -62,15 +75,16 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
             Positioned(
-              bottom: 0,
+                bottom: 0,
                 child: SizedBox(
                   width: widthsize,
-                  height: heightsize*0.15,
-                  child: Center(child: goRegister(heightsize, widthsize, context)),
+                  height: heightsize * 0.15,
+                  child:
+                      Center(child: goRegister(heightsize, widthsize, context)),
                 )),
-                  ],
-                ),
-          )),
+          ],
+        ),
+      )),
     );
   }
 
@@ -80,7 +94,7 @@ class _LoginPageState extends State<LoginPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              margin: EdgeInsets.only(left: widthsize * 0.02),
+              // margin: EdgeInsets.only(left: widthsize * 0.02),
               height: heightsize * 0.03,
               decoration: const BoxDecoration(
                 border: Border(
@@ -98,7 +112,7 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
             ),
-            SizedBox(height: heightsize * 0.03),
+            SizedBox(height: heightsize * 0.02),
             Text(
               "Login to \nBee Point",
               style: TextStyle(
@@ -200,8 +214,9 @@ class _LoginPageState extends State<LoginPage> {
         child: ElevatedButton(
           onPressed: btnlogin,
           style: ElevatedButton.styleFrom(
-              backgroundColor: kYellow,
-              shape: const StadiumBorder(),),
+            backgroundColor: kYellow,
+            shape: const StadiumBorder(),
+          ),
           child: Text(
             "เข้าสู่ระบบ",
             style: mystyleText(heightsize, 0.025, kGray4A, true),
@@ -211,48 +226,47 @@ class _LoginPageState extends State<LoginPage> {
 
   void btnlogin() {
     if (_formKey.currentState!.validate()) {
-      AccountService()
-          .apiLogin(_ctrlLogin.text, _ctrlPswd.text)
-          .then((value) => {
-                if (value != null)
+      AccountService().apiLogin(_ctrlLogin.text, _ctrlPswd.text).then((value) =>
+          {
+            if (value != null)
+              {
+                if (value.isstore == false)
                   {
-                    if (value.isstore == false)
-                      {
-                        {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const MenuUser()),
-                          ),
-                          SecureStorage().write('token', value.accessToken),
-                          SecureStorage().write('idAccount', value.accountid),
-                          SecureStorage().write('isstore', value.isstore.toString()),
-                          context.read<AppData>().token = value.accessToken,
-                          context.read<AppData>().idAccount = value.accountid,
-                        }
-                      }
-                    else
-                      {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const MenuShop()),
-                        ),
-                        SecureStorage().write('token', value.accessToken),
-                        SecureStorage().write('idAccount', value.accountid),
-                        SecureStorage().write('isstore', value.isstore.toString()),
-                        context.read<AppData>().token = value.accessToken,
-                        context.read<AppData>().idAccount = value.accountid,
-                      }
+                    {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const MenuUser()),
+                      ),
+                      SecureStorage().write('token', value.accessToken),
+                      SecureStorage().write('idAccount', value.accountid),
+                      SecureStorage()
+                          .write('isstore', value.isstore.toString()),
+                      context.read<AppData>().token = value.accessToken,
+                      context.read<AppData>().idAccount = value.accountid,
+                    }
                   }
                 else
                   {
-                    showAlertBox(
-                        context, 'แจ้งเตือน', 'ชื่อผู้ใช้หรือรหัสผ่านพิดพลาด'),
-                    isvalid = false,
-                    if (_formKey.currentState!.validate()) {}
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => const MenuShop()),
+                    ),
+                    SecureStorage().write('token', value.accessToken),
+                    SecureStorage().write('idAccount', value.accountid),
+                    SecureStorage().write('isstore', value.isstore.toString()),
+                    context.read<AppData>().token = value.accessToken,
+                    context.read<AppData>().idAccount = value.accountid,
                   }
-              });
+              }
+            else
+              {
+                showAlertBox(
+                    context, 'แจ้งเตือน', 'ชื่อผู้ใช้หรือรหัสผ่านพิดพลาด'),
+                isvalid = false,
+                if (_formKey.currentState!.validate()) {}
+              }
+          });
     }
   }
 
@@ -282,4 +296,19 @@ class _LoginPageState extends State<LoginPage> {
               )),
         ],
       );
+
+  Future<void> initUniqueIdentifierState() async {
+    String identifier;
+    try {
+      identifier = (await UniqueIdentifier.serial)!;
+    } on PlatformException {
+      identifier = 'Failed to get Unique Identifier';
+    }
+
+    if (!mounted) return;
+
+    setState(() {
+      _identifier = identifier;
+    });
+  }
 }

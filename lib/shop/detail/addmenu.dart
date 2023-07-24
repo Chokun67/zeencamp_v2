@@ -5,9 +5,9 @@ import 'package:image_picker/image_picker.dart';
 import 'package:zeencamp_v2/application/accountService/accountservice.dart';
 import 'package:zeencamp_v2/background.dart/background.dart';
 
-import '../application/shopService/shopservice.dart';
-import '../background.dart/appstyle.dart';
-import '../background.dart/securestorage.dart';
+import '../../application/shopService/shopservice.dart';
+import '../../background.dart/appstyle.dart';
+import '../../background.dart/securestorage.dart';
 
 class AddMenuItem extends StatefulWidget {
   const AddMenuItem({super.key});
@@ -284,7 +284,7 @@ class _AddMenuItemState extends State<AddMenuItem> {
         size: 0.05 * widthsize,
       ));
 
-  Widget btnAddMenuItem(heightsize, widthsize) => Container(
+  Widget btnAddMenuItem(heightsize, widthsize) => SizedBox(
         width: widthsize * 0.4,
         height: heightsize * 0.07,
         child: ElevatedButton(

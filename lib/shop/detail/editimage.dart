@@ -2,11 +2,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:zeencamp_v2/application/accountService/accountservice.dart';
-import 'package:zeencamp_v2/background.dart/appstyle.dart';
-
-import '../application/shopService/shopservice.dart';
-import '../background.dart/background.dart';
-import '../background.dart/securestorage.dart';
+import '../../application/shopService/shopservice.dart';
+import '../../background.dart/background.dart';
+import '../../background.dart/securestorage.dart';
 
 class EditImage extends StatefulWidget {
   const EditImage({super.key});
@@ -59,18 +57,23 @@ class _EditImageState extends State<EditImage> {
 
   @override
   Widget build(BuildContext context) {
-    final heightsize = MediaQuery.of(context).size.height- MediaQuery.of(context).padding.vertical;
+    final heightsize = MediaQuery.of(context).size.height -
+        MediaQuery.of(context).padding.vertical;
     final widthsize = MediaQuery.of(context).size.width;
     return Scaffold(
       body: SafeArea(
         child: Stack(
           children: [
-            Mystlye().buildBackground(
-                            widthsize, heightsize, context, "", true, 0.3),
+            Mystlye().buildBackground(widthsize, heightsize, context,
+                "แก้ไขรูปภาพร้านค้า", true, 0.2),
             Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                titleSetting(widthsize, heightsize),
-                deTail(widthsize, heightsize, context),
+                SizedBox(
+                  height: heightsize * 0.175,
+                ),
+                Center(child: deTail(widthsize, heightsize, context)),
               ],
             )
           ],
@@ -78,14 +81,6 @@ class _EditImageState extends State<EditImage> {
       ),
     );
   }
-
-  Widget titleSetting(widthsize, heightsize) => SizedBox(
-        height: heightsize * 0.175,
-        child: Center(
-          child:
-              Text("เข้าร่วมร้านค้า", style: mystyleText(heightsize, 0.02, kBlack, true)),
-        ),
-      );
 
   Widget deTail(widthsize, heightsize, context) => Container(
         padding: EdgeInsets.only(top: heightsize * 0.1),
@@ -147,8 +142,7 @@ class _EditImageState extends State<EditImage> {
       );
   void btnsetpicture() {
     if (file != null) {
-      StoresService()
-          .setStoreimage(token, bit);
+      StoresService().setStoreimage(token, bit);
     }
   }
 }

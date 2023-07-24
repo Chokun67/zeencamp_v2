@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:zeencamp_v2/setting/setting.dart';
 import 'package:zeencamp_v2/shop/tranferbill/billchoice.dart';
-import 'package:zeencamp_v2/shop/detailstore.dart';
+import 'package:zeencamp_v2/shop/detail/detailstore.dart';
+import '../Authentication/login.dart';
 import '../application/accountService/accountservice.dart';
 import '../background.dart/appstyle.dart';
 import '../background.dart/background.dart';
@@ -19,21 +20,15 @@ class MenuShop extends StatefulWidget {
 }
 
 class _MenuShopState extends State<MenuShop> {
-  var pointid = 0;
-  var token = "";
-  var idname = "";
-  var idAccount = "";
+  late var pointid = 0;
+  late var token = "";
+  late var idname = "";
+  late var idAccount = "";
 
   @override
   void initState() {
     super.initState();
-    getData().then((_) {
-      AccountService().apigetpoint(token).then((value) => setState(() {
-            pointid = value.point;
-            idAccount = value.id;
-            idname = value.name;
-          }));
-    });
+      getData();
   }
 
   Future<void> getData() async {
@@ -41,64 +36,78 @@ class _MenuShopState extends State<MenuShop> {
     idAccount = await SecureStorage().read("idAccount") as String;
   }
 
+  Future<void> getpoint() async {
+    await AccountService().apigetpoint(token).then((value) =>
+        {pointid = value.point, idAccount = value.id, idname = value.name});
+  }
+
   @override
   Widget build(BuildContext context) {
-    final heightsize = MediaQuery.of(context).size.height- MediaQuery.of(context).padding.vertical;
+    final heightsize = MediaQuery.of(context).size.height -
+        MediaQuery.of(context).padding.vertical;
     final widthsize = MediaQuery.of(context).size.width;
-    return WillPopScope(
-      onWillPop: () async {
-        showAlertDecide(context,
-            title: 'แจ้งเตือน',
-            content: 'ยืนยันการออกจากระบบ',
-            okAction: logOut);
-        return false;
-      },
-      child: Scaffold(
-        body: SafeArea(
-            child: Stack(
-          children: [
-            Mystlye().buildBackground(
-                widthsize,
-                heightsize,
-                context,
-                "",
-                false,
-                0.3),
-            Padding(
-              padding: EdgeInsets.all(widthsize * 0.03),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  SizedBox(height: heightsize * 0.22),
-                  Center(child: boxPoint(widthsize, heightsize)),
-                  SizedBox(height: heightsize * 0.018),
-                  checkData(widthsize, heightsize),
-                  SizedBox(height: heightsize * 0.018),
-                  fourmenustore(widthsize, heightsize)
-                ],
-              ),
-            ),
-            Positioned(
-                top: widthsize * 0.02,
-                right: widthsize * 0.04,
-                child: settingButton(heightsize, widthsize)),
-            Positioned(
-                top: widthsize * 0.04,
-                left: widthsize * 0.04,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+    return FutureBuilder(
+        future: getData().then((value) => getpoint()),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Mystlye().waitfuture();
+          }
+          if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else {
+            return WillPopScope(
+              onWillPop: () async {
+                showAlertDecide(context,
+                    title: 'แจ้งเตือน',
+                    content: 'ยืนยันการออกจากระบบ',
+                    okAction: logOut);
+                return false;
+              },
+              child: Scaffold(
+                body: SafeArea(
+                    child: Stack(
                   children: [
-                    Text("สวัสดีครับ\nคุณ $idname",
-                        style: mystyleText(heightsize, 0.045, kBlack, true)),
-                      SizedBox(height: heightsize*0.01),
-                    Text("id: $idAccount ",
-                        style: mystyleText(heightsize, 0.025, kGray4A, true))
+                    Mystlye().buildBackground(
+                        widthsize, heightsize, context, "", false, 0.3),
+                    Padding(
+                      padding: EdgeInsets.all(widthsize * 0.03),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          SizedBox(height: heightsize * 0.22),
+                          Center(child: boxPoint(widthsize, heightsize)),
+                          SizedBox(height: heightsize * 0.018),
+                          checkData(widthsize, heightsize),
+                          SizedBox(height: heightsize * 0.018),
+                          fourmenustore(widthsize, heightsize)
+                        ],
+                      ),
+                    ),
+                    Positioned(
+                        top: widthsize * 0.02,
+                        right: widthsize * 0.04,
+                        child: settingButton(heightsize, widthsize)),
+                    Positioned(
+                        top: widthsize * 0.04,
+                        left: widthsize * 0.04,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text("สวัสดีครับ\nคุณ $idname",
+                                style: mystyleText(
+                                    heightsize, 0.045, kBlack, true)),
+                            SizedBox(height: heightsize * 0.01),
+                            Text("id: $idAccount ",
+                                style: mystyleText(
+                                    heightsize, 0.025, kGray4A, true))
+                          ],
+                        ))
                   ],
-                ))
-          ],
-        )),
-      ),
-    );
+                )),
+              ),
+            );
+          }
+        });
   }
 
   Widget boxPoint(widthsize, heightsize) => InkWell(
@@ -204,19 +213,25 @@ class _MenuShopState extends State<MenuShop> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   InkWell(
-                    onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const BuyPoint())),
+                    onTap: () async {
+                      await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const BuyPoint()));
+                      setState(() {});
+                    },
                     child: menustore(widthsize, heightsize,
                         Icons.attach_money_outlined, "ซื้อพอยท์"),
                   ),
                   InkWell(
-                      onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => DetailStore(
-                                  idshop: idAccount, nameshop: idname))),
+                      onTap: () async {
+                        await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => DetailStore(
+                                    idshop: idAccount, nameshop: idname)));
+                        setState(() {});
+                      },
                       child: menustore(
                           widthsize, heightsize, Icons.store, "ร้านค้า"))
                 ]),
@@ -268,8 +283,13 @@ class _MenuShopState extends State<MenuShop> {
       );
 
   void logOut() {
-    SecureStorage().deleteAll();
-    Navigator.pop(context);
+    SecureStorage().delete("token");
+    SecureStorage().delete("idAccount");
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => const LoginPage()),
+      (route) => false,
+    );
   }
 
   Widget settingButton(widthsize, heightsize) => IconButton(

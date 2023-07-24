@@ -149,7 +149,8 @@ class _SettingState extends State<SettingPage> {
       ));
 
   void logOut(context) {
-    SecureStorage().deleteAll();
+    SecureStorage().delete("token");
+    SecureStorage().delete("idAccount");
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (context) => const LoginPage()),

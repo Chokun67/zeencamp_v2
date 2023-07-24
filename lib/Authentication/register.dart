@@ -26,6 +26,17 @@ class _RegisterPageState extends State<RegisterPage> {
   final _ctrldatetime = TextEditingController();
   final _ctrlgender = TextEditingController();
   DateTime selectedDate = DateTime.now();
+  String identifier = "";
+  @override
+  void initState() {
+    super.initState();
+    getData();
+  }
+
+  Future<void> getData() async {
+    identifier = await SecureStorage().read("imei") as String;
+  }
+
   @override
   Widget build(BuildContext context) {
     final heightsize = MediaQuery.of(context).size.height;
@@ -224,52 +235,52 @@ class _RegisterPageState extends State<RegisterPage> {
       );
 
   Widget textfieldbirthday(heightsize, widthsize) => TextFormField(
-    controller: _ctrldatetime,
-    validator: (value) {
-      if (value!.isEmpty) {
-        return 'กรุณากรอกค่า';
-      }
-      return null;
-    },
-    readOnly: true,
-    style: TextStyle(fontSize: heightsize * 0.02),
-    decoration: InputDecoration(
-        border: const OutlineInputBorder(
-            borderRadius: BorderRadius.all(Radius.circular(15))),
+        controller: _ctrldatetime,
+        validator: (value) {
+          if (value!.isEmpty) {
+            return 'กรุณากรอกค่า';
+          }
+          return null;
+        },
+        readOnly: true,
+        style: TextStyle(fontSize: heightsize * 0.02),
+        decoration: InputDecoration(
+            border: const OutlineInputBorder(
+                borderRadius: BorderRadius.all(Radius.circular(15))),
             contentPadding: EdgeInsets.symmetric(vertical: heightsize * 0.008),
-        fillColor: kGrayD9,
-        filled: true,
-        hintText: "วันเกิด",
-        prefixIcon: const Icon(Icons.cake_outlined),
-        suffixIcon: InkWell(
-            onTap: () async {
-              final DateTime? dateTime = await showDatePicker(
-                context: context,
-                initialDate: selectedDate,
-                firstDate: DateTime(1940),
-                lastDate: DateTime.now(),
-                builder: (BuildContext context, Widget? child) {
-                  return Theme(
-                    data: ThemeData.light().copyWith(
-                      colorScheme: const ColorScheme.light().copyWith(
-                        primary: kDarkYellow, // กำหนดสีหัวข้อที่ต้องการ
-                      ),
-                    ),
-                    child: child ?? const SizedBox(),
+            fillColor: kGrayD9,
+            filled: true,
+            hintText: "วันเกิด",
+            prefixIcon: const Icon(Icons.cake_outlined),
+            suffixIcon: InkWell(
+                onTap: () async {
+                  final DateTime? dateTime = await showDatePicker(
+                    context: context,
+                    initialDate: selectedDate,
+                    firstDate: DateTime(1940),
+                    lastDate: DateTime.now(),
+                    builder: (BuildContext context, Widget? child) {
+                      return Theme(
+                        data: ThemeData.light().copyWith(
+                          colorScheme: const ColorScheme.light().copyWith(
+                            primary: kDarkYellow, // กำหนดสีหัวข้อที่ต้องการ
+                          ),
+                        ),
+                        child: child ?? const SizedBox(),
+                      );
+                    },
                   );
-                },
-              );
 
-              if (dateTime != null) {
-                setState(() {
-                  selectedDate = dateTime;
-                  _ctrldatetime.text =
-                      "${selectedDate.day}/${selectedDate.month}/${selectedDate.year}";
-                });
-              }
-            },
-            child: Icon(Icons.arrow_drop_down, size: widthsize * 0.1))),
-  );
+                  if (dateTime != null) {
+                    setState(() {
+                      selectedDate = dateTime;
+                      _ctrldatetime.text =
+                          "${selectedDate.day}/${selectedDate.month}/${selectedDate.year}";
+                    });
+                  }
+                },
+                child: Icon(Icons.arrow_drop_down, size: widthsize * 0.1))),
+      );
 
   Widget textfieldgender(heightsize, widthsize) {
     void showGenderMenu() {
@@ -306,6 +317,7 @@ class _RegisterPageState extends State<RegisterPage> {
         },
       );
     }
+
     return TextFormField(
       readOnly: true,
       style: TextStyle(fontSize: heightsize * 0.02),
@@ -350,19 +362,26 @@ class _RegisterPageState extends State<RegisterPage> {
     if (_formKey.currentState!.validate()) {
       if (_ctrlpswd.text == _ctrlconfirm.text) {
         AccountService()
-            .apiRegister(_ctrluser.text, _ctrlusername.text, _ctrlpswd.text,
-                DateFormat('yyyy-MM-dd').format(selectedDate), _ctrlgender.text)
+            .apiRegister(
+                _ctrluser.text,
+                _ctrlusername.text,
+                _ctrlpswd.text,
+                DateFormat('yyyy-MM-dd').format(selectedDate),
+                _ctrlgender.text,
+                identifier)
             .then((value) => {
                   if (value != null)
                     {
-                      Navigator.pushReplacement(
+                      Navigator.pushAndRemoveUntil(
                         context,
                         MaterialPageRoute(
                             builder: (context) => const MenuUser()),
+                        (route) => false,
                       ),
                       SecureStorage().write('token', value.accessToken),
                       SecureStorage().write('idAccount', value.accountid),
-                      SecureStorage().write('isstore', value.isstore.toString()),
+                      SecureStorage()
+                          .write('isstore', value.isstore.toString()),
                       context.read<AppData>().token = value.accessToken,
                       context.read<AppData>().idAccount = value.accountid,
                     }
