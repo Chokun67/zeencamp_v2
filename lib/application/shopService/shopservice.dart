@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
 import 'package:zeencamp_v2/domain/dmstore/detailshopdm.dart';
 import '../../domain/dmstore/allstore.dart';
 import '../../domain/dmstore/getpayment.dart';
@@ -20,7 +21,6 @@ class StoresService {
         HttpHeaders.authorizationHeader: 'Bearer $token',
       },
     );
-    print(jsonDecode(response.body));
     if (response.statusCode == 200) {
       var decodeutf8 = utf8.decode(response.bodyBytes);
       final List<dynamic> jsonList = jsonDecode(decodeutf8);
@@ -262,13 +262,31 @@ class StoresService {
           HttpHeaders.authorizationHeader: 'Bearer $token',
         },
         body: jsonEncode(<String, String>{'location': location}));
-    debugPrint("data"+location);
+    debugPrint("data" + location);
     debugPrint("position " + response.statusCode.toString());
     if (response.statusCode == 200) {
       return Check.fromJson(jsonDecode(response.body));
     } else {
       print(jsonDecode(response.body).toString());
       return Check(code: response.statusCode, message: "");
+    }
+  }
+
+  Future<void> dowloadreport(token) async {
+    final response = await http.get(
+      Uri.parse('http://$ipAddress:$port/api/v1/report/download?auth=$token'),
+    );
+
+    if (response.statusCode == 200) {
+      final bytes = response.bodyBytes;
+    const fileName = 'your_report.csv'; // กำหนดชื่อและนามสกุลไฟล์ที่ต้องการ
+    final directory = await getExternalStorageDirectory();// ให้ไฟล์ถูกบันทึกใน temporary directory ของแอป
+    final filePath = '${directory!.path}/$fileName';
+    File file = File(filePath);
+    await file.writeAsBytes(bytes); // เขียน bytes ลงในไฟล์
+    print('Downloaded to: $filePath');
+    } else {
+    print('error');
     }
   }
 }

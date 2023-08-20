@@ -136,7 +136,7 @@ class _TranferPageState extends State<TranferPage> {
                   EdgeInsets.symmetric(vertical: heightsize * 0.008),
               fillColor: kWhite,
               filled: true,
-              hintText: "User ID",
+              hintText: "ไอดีผู้ใช้",
               prefixIcon: const Icon(Icons.person_2_outlined),
               suffixIcon: InkWell(
                   onTap: () {

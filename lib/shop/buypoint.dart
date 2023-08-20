@@ -18,7 +18,6 @@ class _BuyPointState extends State<BuyPoint> {
   bool test = false;
   bool isExpanded = false; // สถานะของ ExpansionTile
   List<ExpansionTileController> expanController = [];
-  final ExpansionTileController _controller = ExpansionTileController();
   var pointid = 0;
   var token = "";
   var idname = "";
@@ -92,65 +91,7 @@ class _BuyPointState extends State<BuyPoint> {
     );
   }
 
-  Widget listMenutest(widthsize, heightsize) {
-    return Padding(
-        padding: EdgeInsets.all(widthsize * 0.03),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Container(
-              padding: EdgeInsets.only(top: heightsize * 0.1),
-              height: heightsize * 0.6,
-              child: Column(children: [
-                ListView.builder(
-                    physics: const ScrollPhysics(parent: null),
-                    shrinkWrap: true,
-                    itemCount: 1,
-                    itemBuilder: (context, index) {
-                      return Padding(
-                          padding: EdgeInsets.only(bottom: heightsize * 0.01),
-                          child: ExpansionTile(
-                              controller: _controller,
-                              // IgnorePointeer propogates touch down to tile
-                              trailing:
-                                  const IgnorePointer(child: SizedBox.shrink()),
-                              title: Row(children: [
-                                Checkbox(
-                                  value: test, // สถานะเช็คบล็อก
-                                  onChanged: (bool? value) {
-                                    setState(() {
-                                      test = !test;
-                                    });
-                                    if (test) {
-                                      expanController[index].expand();
-                                    } else {
-                                      expanController[index].collapse();
-                                    }
-                                  },
-                                ),
-                                Container(
-                                  margin:
-                                      EdgeInsets.only(left: widthsize * 0.02),
-                                  width: widthsize * 0.25,
-                                  height: heightsize * 0.1,
-                                  child: Center(
-                                    child: Text(
-                                      "30",
-                                      style: TextStyle(
-                                        fontSize: heightsize * 0.025,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ]),
-                              onExpansionChanged: (expanded) {
-                                // ไม่ต้องทำอะไรเพิ่มเติมในส่วนนี้
-                              },
-                              children: test
-                                  ? [buildButtons(context, index, heightsize)]
-                                  : []));
-                    }),
-              ]))
-        ]));
-  }
+
 
   Widget listMenu(widthsize, heightsize) {
     return Padding(
@@ -209,14 +150,14 @@ class _BuyPointState extends State<BuyPoint> {
                             ),
                           ),
                           children: isCheckedList[index]
-                              ? [buildButtons(context, index, heightsize)]
+                              ? [buildButtons(context, index, heightsize,widthsize)]
                               : []));
                 }),
           ])
         ]));
   }
 
-  Widget buildButtons(BuildContext context, index, heightsize) => Row(
+  Widget buildButtons(BuildContext context, index, heightsize,widthsize) => Row(
         children: [
           Expanded(
             flex: 5,
@@ -233,112 +174,157 @@ class _BuyPointState extends State<BuyPoint> {
           Expanded(
             flex: 7,
             child: Container(
-              padding: EdgeInsets.all(heightsize * 0.01),
-              child: SizedBox(
-                height: heightsize * 0.04,
-                child: TextField(
-                  inputFormatters: [
-                    FilteringTextInputFormatter
-                        .digitsOnly, // จำกัดให้เป็นตัวเลขเท่านั้น
-                  ],
-                  controller: textControllers[index],
-                  decoration: InputDecoration(
-                    border: const OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(5))),
-                    contentPadding:
-                        EdgeInsets.symmetric(vertical: heightsize * 0.000001),
-                    // fillColor: kGrayD9,
-                    // filled: true,
-                    hintText: "",
-                  ),
+              padding: EdgeInsets.only(left: widthsize*0.02),
+              height: heightsize * 0.04,
+              child: TextField(
+                inputFormatters: [
+                  FilteringTextInputFormatter
+                      .digitsOnly, // จำกัดให้เป็นตัวเลขเท่านั้น
+                  FilteringTextInputFormatter.allow(RegExp(r'^[1-9]?[0-9]$')),
+                ],
+                
+                controller: textControllers[index],
+                decoration: InputDecoration(
+                  border: const OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(5)),
+                      ),
+                  contentPadding:
+                      EdgeInsets.symmetric(horizontal: widthsize * 0.02),
+                  // fillColor: kGrayD9,
+                  // filled: true,
+                  hintText: "",
                 ),
               ),
             ),
           )
         ],
       );
+  double find() {
+    double amount = 0;
+    if (isCheckedList.every((element) => !element)) {
+    } else {
+      for (int i = 0; i < isCheckedList.length; i++) {
+        if (isCheckedList[i]) {
+          try {
+            amount =
+                double.parse(textControllers[i].text) * paymentlist[i]!.price;
+          } catch (e) {
+            return 0.0;
+          }
+        }
+      }
+    }
+    return amount;
+  }
+
   bool hasError = false;
   Widget buttonBuyPoint(widthsize, heightsize) => Container(
+      padding: EdgeInsets.only(left: widthsize * 0.02, right: widthsize * 0.02),
       width: widthsize,
-      height: heightsize * 0.05,
-      color: Colors.amberAccent,
+      height: heightsize * 0.08,
+      color: kWhite,
       child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
         textControllers.isNotEmpty
-            ? Text(textControllers[0].text)
+            ? Text(
+                "ราคารวม: ${find()}",
+                style: mystyleText(heightsize, 0.025, kGray4A, false),
+              )
             : const Text(''),
-        ElevatedButton(
-            onPressed: () {
-              String idPayment = "";
-              int amount = 0;
-              for (int i = 0; i < isCheckedList.length; i++) {
-                if (isCheckedList[i]) {
-                  try {
-                    amount = int.parse(textControllers[i].text);
-                    idPayment = paymentlist[i]!.id;
-                    if (amount < 1) {
-                      hasError = true;
-                      break;
+        SizedBox(
+          width: widthsize*0.26,
+          height: heightsize*0.06,
+          child: ElevatedButton(
+              onPressed: () {
+                String idPayment = "";
+                int amount = 0;
+                if (isCheckedList.every((element) => !element)) {
+                  showAlertBox(context, "แจ้งเตือน", "กรุณาเลือกรายการ");
+                  hasError = true;
+                } else {
+                  for (int i = 0; i < isCheckedList.length; i++) {
+                    if (isCheckedList[i]) {
+                      try {
+                        amount = int.parse(textControllers[i].text);
+                        idPayment = paymentlist[i]!.id;
+                        if (amount < 1) {
+                          hasError = true;
+                          break;
+                        }
+                      } catch (e) {
+                        hasError = true;
+                        showAlertBox(context, "test", "กรุณากรอกตัวเลข");
+                        break;
+                      }
                     }
-                  } catch (e) {
-                    hasError = true;
-                    showAlertBox(context, "test", "กรุณากรอกตัวเลข");
-                    break;
                   }
                 }
-              }
-              if (!hasError) {
-                showDialog<void>(
-                  context: context,
-                  builder: (BuildContext context) {
-                    String confirmationCode = '';
-                    bool obscureText = true;
-                    return AlertDialog(
-                      title: Text("ยืนยัน"),
-                      content: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text("กรุณากรอกรหัสเพื่อยืนยันการซื้อ"),
-                          TextField(
-                            onChanged: (value) {
-                              confirmationCode = value;
-                            },
-                            obscureText: obscureText,
-                            style: TextStyle(fontSize: heightsize * 0.02),
-                            decoration: InputDecoration(
-                              contentPadding: EdgeInsets.symmetric(
-                                  vertical: heightsize * 0.008),
-                              labelText: "รหัสผ่าน",
+                if (!hasError) {
+                  showDialog<void>(
+                    context: context,
+                    builder: (BuildContext context) {
+                      String confirmationCode = '';
+                      bool obscureText = true;
+                      return AlertDialog(
+                        title: const Text("ยืนยัน"),
+                        content: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Text("กรุณากรอกรหัสเพื่อยืนยันการซื้อ"),
+                            TextField(
+                              onChanged: (value) {
+                                confirmationCode = value;
+                              },
+                              obscureText: obscureText,
+                              style: TextStyle(fontSize: heightsize * 0.02),
+                              decoration: InputDecoration(
+                                contentPadding: EdgeInsets.symmetric(
+                                    vertical: heightsize * 0.008),
+                                labelText: "รหัสผ่าน",
+                              ),
                             ),
+                          ],
+                        ),
+                        actions: [
+                          ElevatedButton(
+                            child: const Text('ยกเลิก'),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                          ),
+                          ElevatedButton(
+                            child: const Text('ตกลง'),
+                            onPressed: () {
+                              StoresService()
+                                  .buyPaymentConfirm(
+                                      token, idPayment, amount, confirmationCode)
+                                  .then((value) => {
+                                        if (value.code == 200 ||
+                                            value.code == 500)
+                                          {
+                                            showAlertBox2(context, "แจ้งเตือน",
+                                                "เรียบร้อย", heightsize),
+                                          }
+                                        else
+                                          {Navigator.of(context).pop()}
+                                      });
+                            },
                           ),
                         ],
-                      ),
-                      actions: [
-                        ElevatedButton(
-                          child: const Text('ยกเลิก'),
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                        ),
-                        ElevatedButton(
-                          child: const Text('ตกลง'),
-                          onPressed: () {
-                            print(idPayment);
-                            print(amount.toString());
-                            StoresService().buyPaymentConfirm(
-                                token, idPayment, amount, confirmationCode);
-                            Navigator.of(context).pop();
-                            setState(() {});
-                          },
-                        ),
-                      ],
-                    );
-                  },
-                );
-                hasError = false;
-              } else {
-                hasError = false;
-              }
-            },
-            child: const Text("ซื้อพอยท์"))
+                      );
+                    },
+                  );
+                  hasError = false;
+                } else {
+                  hasError = false;
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: kYellow,
+              ),
+              child: Text(
+                "ชำระเงิน",
+                style: mystyleText(heightsize, 0.025, kGray4A, false),
+              )),
+        )
       ]));
 }

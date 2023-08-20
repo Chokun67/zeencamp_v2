@@ -9,7 +9,7 @@ import '../../domain/dmaccount/userdm.dart';
 import '../../domain/dmstore/storecheck.dart';
 
 class AccountService {
-  var ipAddress = "13.212.167.80";
+  var ipAddress = "18.142.162.14";
   var port = "17003";
 
   Future<Customer?> apiLogin(String login, String pswd) async {
@@ -139,7 +139,7 @@ class AccountService {
       final jsonData = jsonDecode(decodeutf8);
       return UserModel.fromJson(jsonData);
     } else {
-      throw Exception('Failed to fetch user data');
+      return UserModel(name: "", id: "", point: 0);
     }
   }
 }

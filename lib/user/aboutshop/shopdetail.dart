@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../application/accountService/accountservice.dart';
 import '../../application/shopService/shopservice.dart';
@@ -6,20 +7,23 @@ import '../../background.dart/appstyle.dart';
 import '../../background.dart/background.dart';
 import '../../background.dart/securestorage.dart';
 import '../../domain/dmstore/detailshopdm.dart';
+import '../../shop/detail/detailmenu.dart';
 
 class ShopDetail extends StatefulWidget {
-  const ShopDetail({Key? key, required this.idshop, required this.nameshop})
+  const ShopDetail({Key? key, required this.idshop, required this.nameshop,required this.lat,required this.lon})
       : super(key: key);
 
   final String idshop;
   final String nameshop;
+  final double lat;
+  final double lon;
 
   @override
   State<ShopDetail> createState() => _ShopDetailState();
 }
 
 class _ShopDetailState extends State<ShopDetail> {
-      final String ip = AccountService().ipAddress;
+  final String ip = AccountService().ipAddress;
   var token = "";
   var idAccount = "";
   var idname = "";
@@ -154,7 +158,7 @@ class _ShopDetailState extends State<ShopDetail> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "ร้าน ${widget.nameshop}",
+              " ${widget.nameshop}",
               style: TextStyle(
                   color: kGray4A,
                   fontSize: heightsize * 0.026,
@@ -168,7 +172,24 @@ class _ShopDetailState extends State<ShopDetail> {
                         bottom: BorderSide(
                   color: kGray75,
                   width: 2.0,
-                ))))
+                )))),
+            Expanded(
+              child: Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.location_pin),
+                    iconSize: heightsize * 0.05,
+                    onPressed: () {
+                     openGoogleMapNavigation( 1, 100.5018);
+                    },
+                  ),
+                  Text(
+                    "เปิดใช้งาน Google Map ",
+                    style: mystyleText(heightsize, 0.02, kGray4A, false),
+                  )
+                ],
+              ),
+            ),
           ],
         ),
       );
@@ -190,20 +211,41 @@ class _ShopDetailState extends State<ShopDetail> {
                 margin:
                     const EdgeInsets.all(8.0), // ระยะห่างรอบด้านของแต่ละรายการ
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                        height: heightsize * 0.14,
-                        width: widthsize * 0.44,
-                        color: Colors.green,
-                        child: Image.network(
-                          'http://$ip:17003/api/v1/util/image/${menuStore?.pictures}',
-                          fit: BoxFit.cover,
-                        )), // รูปภาพ
+                    InkWell(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => DetailMenu(
+                                  image: menuStore!.pictures,
+                                  name: menuStore.nameMenu,
+                                  exchange: menuStore.exchange.toString(),
+                                  price: menuStore.price.toString(),
+                                  receive: menuStore.receive.toString())),
+                        );
+                      },
+                      child: Container(
+                          decoration: const BoxDecoration(
+                            borderRadius: BorderRadius.all(Radius.circular(10)),
+                            color: Colors.green,
+                          ),
+                          height: heightsize * 0.14,
+                          width: widthsize * 0.44,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
+                            child: Image.network(
+                              'http://$ip:17003/api/v1/util/image/${menuStore?.pictures}',
+                              fit: BoxFit.cover,
+                            ),
+                          )),
+                    ), // รูปภาพ
                     Text(
-                      "ชื่อ ${menuStore!.nameMenu}", // ข้อความบรรทัดที่ 1
+                      menuStore!.nameMenu, // ข้อความบรรทัดที่ 1
                     ),
-                    const Text(
-                      "รายการที่ 2", // ข้อความบรรทัดที่ 2
+                    Text(
+                      "${menuStore.price} บาท", // ข้อความบรรทัดที่ 2
                     ),
                   ],
                 ),
@@ -213,24 +255,24 @@ class _ShopDetailState extends State<ShopDetail> {
         ]),
       );
 
-  Widget detailPicture(double widthsize, double heightsize, String? pictures,
-      String idMenu, int price) {
-    return InkWell(
-      onTap: () {},
-      child: Container(
-        width: widthsize * 0.3,
-        decoration: BoxDecoration(
-          borderRadius: const BorderRadius.all(Radius.circular(15)),
-          border: Border.all(color: const Color(0xFF000000), width: 4),
-        ),
-        child: Image.network(
-          'http://$ip:17003/api/v1/image/$pictures',
-          fit: BoxFit.cover,
-          // ปรับขนาดภาพให้พอดีกับขนาด Container
-        ),
-      ),
-    );
-  }
+  // Widget detailPicture(double widthsize, double heightsize, String? pictures,
+  //     String idMenu, int price) {
+  //   return InkWell(
+  //     onTap: () {},
+  //     child: Container(
+  //       width: widthsize * 0.3,
+  //       decoration: BoxDecoration(
+  //         borderRadius: const BorderRadius.all(Radius.circular(15)),
+  //         border: Border.all(color: const Color(0xFF000000), width: 4),
+  //       ),
+  //       child: Image.network(
+  //         'http://$ip:17003/api/v1/image/$pictures',
+  //         fit: BoxFit.cover,
+  //         // ปรับขนาดภาพให้พอดีกับขนาด Container
+  //       ),
+  //     ),
+  //   );
+  // }
 
   Widget detailPrice(widthsize, heightsize, name, price, receive, exchange) =>
       Container(
@@ -250,4 +292,14 @@ class _ShopDetailState extends State<ShopDetail> {
           ),
         ),
       );
+
+  void openGoogleMapNavigation(double lat, double lon) async {
+    String googleMapUrl =
+        "https://www.google.com/maps/search/?api=1&query=$lat,$lon";
+    if (await canLaunch(googleMapUrl)) {
+      await launch(googleMapUrl);
+    } else {
+      throw 'Could not launch $googleMapUrl';
+    }
+  }
 }

@@ -6,10 +6,19 @@ import '../../background.dart/securestorage.dart';
 
 // ignore: must_be_immutable
 class DetailMenu extends StatelessWidget {
-  DetailMenu({Key? key, required this.image, required this.name})
+  DetailMenu(
+      {Key? key,
+      required this.image,
+      required this.name,
+      required this.exchange,
+      required this.price,
+      required this.receive})
       : super(key: key);
   String image;
   String name;
+  String exchange;
+  String price;
+  String receive;
   final String ip = AccountService().ipAddress;
 
   var token = "";
@@ -73,15 +82,43 @@ class DetailMenu extends StatelessWidget {
           ],
         ), //มาจากทำขอบขาว
         Padding(
-          padding: EdgeInsets.all(widthsize * 0.03),
+          padding: EdgeInsets.all(widthsize * 0.06),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(height: heightsize * 0.23),
-              SizedBox(height: heightsize * 0.05),
+              SizedBox(height: heightsize * 0.33),
               Column(children: [
-                // detailMenu2(widthsize, heightsize,
-                //     customerData.menuStores)
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(" $name",
+                        style: mystyleText(heightsize, 0.03, kGray4A, true)),
+                     Text(" $price บาท",
+                    style: mystyleText(heightsize, 0.03, kGray4A, true)),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text("พอยท์ที่ได้",
+                    style: mystyleText(heightsize, 0.03, kGray4A, true)),
+                    Text(" $receive พอยท์",
+                    style: mystyleText(heightsize, 0.03, kGray4A, true)),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text("พอยท์ที่ต้องใช้แลก",
+                    style: mystyleText(heightsize, 0.03, kGray4A, true)),
+                    Text(" $exchange พอยท์",
+                    style: mystyleText(heightsize, 0.03, kGray4A, true))
+                  ],
+                ),
+                
+                
+                
+                
               ])
             ],
           ),

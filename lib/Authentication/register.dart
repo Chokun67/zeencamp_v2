@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:zeencamp_v2/user/menu_user.dart';
@@ -149,6 +150,9 @@ class _RegisterPageState extends State<RegisterPage> {
       );
 
   Widget textfieldusername(heightsize, widthsize) => TextFormField(
+    inputFormatters: [
+    LengthLimitingTextInputFormatter(15), // กำหนดความยาวสูงสุดเป็น 5 ตัวอักษร
+  ],
         controller: _ctrlusername,
         style: TextStyle(fontSize: heightsize * 0.02),
         validator: (value) {

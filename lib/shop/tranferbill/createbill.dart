@@ -78,9 +78,32 @@ class _CreateBillState extends State<CreateBill> {
     super.dispose();
   }
 
+  double find() {
+    double totalamount = 0;
+    double amount = 0;
+    if (isCheckedList.every((element) => !element)) {
+    } else {
+      for (int i = 0; i < isCheckedList.length; i++) {
+        if (isCheckedList[i]) {
+          try {
+            amount = double.parse(textControllers[i].text) *
+                (widget.isReceive
+                    ? storemenu[i].receive
+                    : storemenu[i].exchange);
+            totalamount += amount;
+          } catch (e) {
+            return 0.0;
+          }
+        }
+      }
+    }
+    return totalamount;
+  }
+
   @override
   Widget build(BuildContext context) {
-    final heightsize = MediaQuery.of(context).size.height;
+    final heightsize = MediaQuery.of(context).size.height -
+        MediaQuery.of(context).padding.vertical;
     final widthsize = MediaQuery.of(context).size.width;
     return Scaffold(
       body: SafeArea(
@@ -88,7 +111,7 @@ class _CreateBillState extends State<CreateBill> {
               child: Stack(children: [
         Mystlye().buildBackground(
             widthsize,
-            heightsize - MediaQuery.of(context).padding.vertical,
+            heightsize,
             context,
             widget.isReceive ? "สร้างบิลให้พอยท์" : "สร้างบิลรับพอยท์",
             true,
@@ -102,64 +125,99 @@ class _CreateBillState extends State<CreateBill> {
         Positioned(
             bottom: 0,
             child: Container(
+              padding: EdgeInsets.only(
+                  left: widthsize * 0.02, right: widthsize * 0.02),
               width: widthsize,
-              height: heightsize * 0.05,
-              color: Colors.amberAccent,
+              height: heightsize * 0.062,
+              color: kWhite,
               child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     textControllers.isNotEmpty
-                        ? Text(textControllers[0].text)
+                        ? (widget.isReceive
+                            ? Text("พอยท์ที่ให้: ${find()}",
+                                style: mystyleText(
+                                    heightsize, 0.025, kGray4A, false))
+                            : Text("พอยท์ที่รับ: ${find()}",
+                                style: mystyleText(
+                                    heightsize, 0.025, kGray4A, false)))
                         : const Text(''),
-                    ElevatedButton(
-                        onPressed: () {
-                          for (int i = 0; i < isCheckedList.length; i++) {
-                            if (isCheckedList[i]) {
-                              String key = storemenu[i].id;
-                              int value;
-                              try {
-                                value = int.parse(textControllers[i].text);
-                                sendmenu.add(storemenu[i]);
-                                amountmenu.add(value);
-                                if (value < 1) {
-                                  hasError = true;
-                                  break;
-                                }
-                              } catch (e) {
-                                hasError = true;
-                                showAlertBox(
-                                    context, "test", "กรุณากรอกตัวเลข");
-                                break;
-                              }
-                              qrMap[key] = value;
+                    SizedBox(
+                      width: widthsize * 0.25,
+                      height: heightsize * 0.05,
+                      child: ElevatedButton(
+                          onPressed: () {
+                            if (isCheckedList.every((element) => !element)) {
+                              showAlertBox(
+                                  context, "แจ้งเตือน", "กรุณาเลือกสินค้า");
+                              hasError = true;
                             }
-                          }
-                          if (!hasError) {
-                            showAlertBox(context, "test", "$qrMap");
+                            {
+                              for (int i = 0; i < isCheckedList.length; i++) {
+                                if (isCheckedList[i]) {
+                                  String key = storemenu[i].id;
+                                  int value;
+                                  try {
+                                    if (int.parse(textControllers[i].text) <
+                                        1) {
+                                      qrMap = {};
+                                      hasError = true;
 
-                            TranferService()
-                                .buildqrcodeformenu(
-                                    token, qrMap, widget.isReceive)
-                                .then((value) => {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) => QrBill(
-                                                hash: value!,
-                                                amountmenu: amountmenu,
-                                                menusend: sendmenu,
-                                                isReceive: widget.isReceive)),
-                                      ).then((value) =>
-                                          {sendmenu = [], amountmenu = []})
-                                    });
-
-                            hasError = false;
-                          } else {
-                            hasError = false;
-                          }
-                        },
-                        child: const Text("สร้าง QR"))
-                  ]), // แก้ไขด้วยการตรวจสอบขนาดของ textControllers),
+                                      showAlertBox(context, "test",
+                                          "กรุณากรอกตัวเลขให้ถูกต้อง");
+                                      break;
+                                    } else {
+                                      qrMap[key] =
+                                          int.parse(textControllers[i].text);
+                                    }
+                                    value = int.parse(textControllers[i].text);
+                                    sendmenu.add(storemenu[i]);
+                                    amountmenu.add(value);
+                                  } catch (e) {
+                                    hasError = true;
+                                    showAlertBox(
+                                        context, "test", "กรุณากรอกตัวเลข");
+                                    qrMap = {};
+                                    break;
+                                  }
+                                }
+                              }
+                            }
+                            if (!hasError) {
+                              // showAlertBox(context, "test", "$qrMap");
+                              TranferService()
+                                  .buildqrcodeformenu(
+                                      token, qrMap, widget.isReceive)
+                                  .then((value) => {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) => QrBill(
+                                                  hash: value!,
+                                                  amountmenu: amountmenu,
+                                                  menusend: sendmenu,
+                                                  isReceive: widget.isReceive,
+                                                  sumpoint: find())),
+                                        ).then((value) =>
+                                            {sendmenu = [], amountmenu = []})
+                                      });
+                              qrMap = {};
+                              hasError = false;
+                            } else {
+                              hasError = false;
+                              setState(() {
+                                qrMap = {};
+                              });
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: kYellow,
+                          ),
+                          child: Text("สร้าง QR",
+                              style: mystyleText(
+                                  heightsize, 0.025, kGray4A, false))),
+                    )
+                  ]),
             ))
       ]))),
     );
@@ -179,7 +237,8 @@ class _CreateBillState extends State<CreateBill> {
               fillColor: const Color(0xFFFFFFFF),
               filled: true,
               prefixIcon: const Icon(Icons.search),
-              hintText: "ค้นหา",hintStyle: mystyleText(heightsize, 0.02, kGray4A, false)),
+              hintText: "ค้นหา",
+              hintStyle: mystyleText(heightsize, 0.02, kGray4A, false)),
         ),
       );
 
@@ -228,9 +287,9 @@ class _CreateBillState extends State<CreateBill> {
                                   originalIndex], // สถานะเช็คบล็อก
                               onChanged: (bool? value) {
                                 setState(() {
-                                  isCheckedList[originalIndex] =
-                                      value ?? false; // อัปเดตสถานะเช็คบล็อก
-                                  textControllers[originalIndex].text = "";
+                                  isCheckedList[originalIndex] = value ?? false;
+                                  textControllers[originalIndex].text =
+                                      value ?? false ? "1" : "";
                                 });
                               },
                             ),
@@ -248,9 +307,9 @@ class _CreateBillState extends State<CreateBill> {
                               margin: EdgeInsets.only(left: widthsize * 0.02),
                               width: widthsize * 0.25,
                               height: heightsize * 0.1,
-                              color: isCheckedList[originalIndex]
-                                  ? Colors.green
-                                  : null, // สีของคอนเทนเนอร์
+                              // color: isCheckedList[originalIndex]
+                              //     ? Colors.green
+                              //     : null, // สีของคอนเทนเนอร์
                               child: Center(
                                 child: Text(
                                   displayList[index].nameMenu,
@@ -274,16 +333,19 @@ class _CreateBillState extends State<CreateBill> {
                                   }
                                 }
                               },
-                              icon: Icon(Icons.arrow_downward,
+                              icon: Icon(Icons.indeterminate_check_box_outlined,
                                   size: heightsize * 0.03),
                             ),
                             SizedBox(
                               width: widthsize * 0.1,
                               height: heightsize * 0.03,
                               child: TextField(
+                                  keyboardType: TextInputType.number,
                                   inputFormatters: [
                                     FilteringTextInputFormatter
                                         .digitsOnly, // จำกัดให้เป็นตัวเลขเท่านั้น
+                                    FilteringTextInputFormatter.allow(
+                                        RegExp(r'^[1-9]?[0-9]$')),
                                   ],
                                   readOnly: !isCheckedList[originalIndex],
                                   decoration: const InputDecoration(
@@ -305,7 +367,7 @@ class _CreateBillState extends State<CreateBill> {
                                       incrementedValue.toString();
                                 }
                               },
-                              icon: Icon(Icons.arrow_upward,
+                              icon: Icon(Icons.add_box_outlined,
                                   size: heightsize * 0.03),
                             )
                           ],

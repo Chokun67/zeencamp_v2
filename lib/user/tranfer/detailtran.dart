@@ -5,17 +5,17 @@ import '../../background.dart/appstyle.dart';
 import '../../background.dart/background.dart';
 
 class DetailTranfer extends StatelessWidget {
-  const DetailTranfer({
-    Key? key,
-    required this.idAccount,
-    required this.idname,
-    required this.state,
-    required this.payee,
-    required this.payeename,
-    required this.date,
-    required this.point,
-    required this.balance
-  }) : super(key: key);
+  const DetailTranfer(
+      {Key? key,
+      required this.idAccount,
+      required this.idname,
+      required this.state,
+      required this.payee,
+      required this.payeename,
+      required this.date,
+      required this.point,
+      required this.balance})
+      : super(key: key);
   final String idAccount;
   final String idname;
   final String state;
@@ -74,12 +74,14 @@ class DetailTranfer extends StatelessWidget {
             Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
               Text("การทำรายการ",
                   style: mystyleText(heightsize, 0.03, kGray4A, true)),
-              Text(NumberFormat("#,##0").format(point), style: mystyleText(heightsize, 0.03, kGray4A, true))
+              Text(NumberFormat("#,##0").format(point),
+                  style: mystyleText(heightsize, 0.03, kGray4A, true))
             ]),
             Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
               Text("ยอดคงเหลือ",
                   style: mystyleText(heightsize, 0.03, kGray4A, true)),
-              Text(NumberFormat("#,##0").format(balance), style: mystyleText(heightsize, 0.03, kGray4A, true))
+              Text(NumberFormat("#,##0").format(balance),
+                  style: mystyleText(heightsize, 0.03, kGray4A, true))
             ])
           ],
         ),
@@ -188,7 +190,7 @@ class DetailTranfer extends StatelessWidget {
                     Text("จำนวนPoint",
                         style: mystyleText(heightsize, 0.03, kBlack, false)),
                     Text(
-                      "${NumberFormat("#,##0").format(point)} พอยท์",
+                      "${NumberFormat("#,##0").format(point.abs())} พอยท์",
                       style: mystyleText(heightsize, 0.03, kBlack, false),
                     )
                   ]),

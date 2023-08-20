@@ -12,12 +12,14 @@ class QrBill extends StatefulWidget {
       required this.hash,
       required this.amountmenu,
       required this.menusend,
-      required this.isReceive})
+      required this.isReceive,
+      required this.sumpoint})
       : super(key: key);
   final String hash;
   final List<int> amountmenu;
   final List<Store> menusend;
   final bool isReceive;
+  final double sumpoint;
   @override
   State<QrBill> createState() => _ShopTypeState();
 }
@@ -47,7 +49,7 @@ class _ShopTypeState extends State<QrBill> {
             widthsize,
             heightsize - MediaQuery.of(context).padding.vertical,
             context,
-            "สแกนเพื่อรับพอยท์",
+            widget.isReceive?"สแกนเพื่อรับพอยท์":"สแกนเพื่อใช้พอยท์",
             true,
             0.2),
         Padding(
@@ -55,7 +57,7 @@ class _ShopTypeState extends State<QrBill> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(height: heightsize * 0.23),
+              SizedBox(height: heightsize * 0.2),
               beta(heightsize, widthsize, context),
               menuqr(heightsize, widthsize)
             ],
@@ -98,12 +100,15 @@ class _ShopTypeState extends State<QrBill> {
         width: widthsize,
         child: Column(
           children: [
-            Text("พ้อยที่ได้รับ : 5",
+            Text(
+                widget.isReceive
+                    ? "พ้อยที่ได้รับ : ${widget.sumpoint}"
+                    : "พ้อยที่ต้องชำระ : ${widget.sumpoint}",
                 style: mystyleText(heightsize, 0.03, kGray4A, true)),
             Container(
                 padding: EdgeInsets.all(heightsize * 0.02),
                 width: widthsize * 0.8,
-                height: heightsize * 0.38,
+                height: heightsize * 0.3,
                 decoration: const BoxDecoration(
                     borderRadius: BorderRadius.all(Radius.circular(15)),
                     color: kWhite,
@@ -115,13 +120,19 @@ class _ShopTypeState extends State<QrBill> {
                           offset: Offset(0, 5) // ตำแหน่งเงาแนวนอนและแนวตั้ง
                           )
                     ]),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    topic(heightsize, widthsize),
-                    menu1(heightsize, widthsize)
-                  ],
-                ))
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      topic(heightsize, widthsize),
+                      menu1(heightsize, widthsize)
+                    ],
+                  ),
+                )),
+            SizedBox(
+              height: heightsize * 0.02,
+            ),
+            loginButton(heightsize, widthsize, context)
           ],
         ),
       );
@@ -183,8 +194,8 @@ class _ShopTypeState extends State<QrBill> {
                           child: Center(
                             child: Text(
                                 widget.isReceive
-                                    ? "${menu.receive}"
-                                    : "${menu.exchange}",
+                                    ? "${menu.receive * widget.amountmenu[index]}"
+                                    : "${menu.exchange * widget.amountmenu[index]}",
                                 style: mystyleText(
                                     heightsize, 0.02, kGray4A, false)),
                           )),
@@ -279,7 +290,7 @@ class _ShopTypeState extends State<QrBill> {
             shape: const StadiumBorder(),
           ),
           child: Text(
-            "เข้าสู่ระบบ",
+            "ตรวจสอบQR",
             style: mystyleText(heightsize, 0.025, kGray4A, true),
           ),
         ),

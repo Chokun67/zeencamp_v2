@@ -25,15 +25,43 @@ class _LoginPageState extends State<LoginPage> {
   final _ctrlPswd = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool isvalid = true;
+  var token;
+  String isstore = "";
   ////////////////////////////
   String _identifier = 'Unknown';
-
- 
 
   @override
   void initState() {
     super.initState();
-    initUniqueIdentifierState().then((_) => SecureStorage().write('imei', _identifier),);
+    initUniqueIdentifierState()
+        .then((_) => SecureStorage().write('imei', _identifier));
+    getData().then((_) {
+      AccountService().apigetpoint(token).then((value) => {
+            if (value.id != "")
+              {
+                if (isstore.toLowerCase() == 'false')
+                  {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => const MenuUser()),
+                    )
+                  }
+                else
+                  {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => const MenuShop()),
+                    )
+                  }
+              }
+          });
+    });
+  }
+
+  Future<void> getData() async {
+    token = await SecureStorage().read("token");
+    token ??= "";
+    isstore = await SecureStorage().read('isstore') as String;
   }
 
   @override

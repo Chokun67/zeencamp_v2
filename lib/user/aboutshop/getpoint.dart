@@ -99,9 +99,10 @@ class _GetPointState extends State<GetPoint> {
               Text("100", style: mystyleText(heightsize, 0.03, kGray4A, true))
             ]),
             Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-              Text("ยอดคงเหลือ",
+              Text("ยอดปัจจุบัน",
                   style: mystyleText(heightsize, 0.03, kGray4A, true)),
-              Text("3600", style: mystyleText(heightsize, 0.03, kGray4A, true))
+              Text(NumberFormat("#,##0").format(pointid),
+                  style: mystyleText(heightsize, 0.03, kGray4A, true))
             ])
           ],
         ),
@@ -128,6 +129,7 @@ class _GetPointState extends State<GetPoint> {
   Widget detailTrandfer(widthsize, heightsize) => Container(
         height: heightsize * 0.45,
         width: widthsize * 0.9,
+        padding: EdgeInsets.all(6),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
           color: kWhite,
@@ -140,63 +142,97 @@ class _GetPointState extends State<GetPoint> {
             )
           ],
         ),
-        child: Row(
+        child: Stack(
           children: [
-            SizedBox(
-              width: widthsize * 0.4,
-              child: Column(
-                children: [
-                  Text("รายการ",style: mystyleText(heightsize, 0.025, kBlack, false),),
-                  ListView.builder(
-                      itemCount: widget.menuList.length,
-                      padding: EdgeInsets.all(widthsize * 0.04),
-                      physics: const ScrollPhysics(parent: null),
-                      shrinkWrap: true,
-                      itemBuilder: (BuildContext buildList, int index) {
-                        MenuList menu = widget.menuList[index];
-                        return Text(menu.nameMenu);
-                      })
-                ],
-              ),
+            Row(
+              children: [
+                SizedBox(
+                  width: widthsize * 0.4,
+                  child: Column(
+                    children: [
+                      Text(
+                        "รายการ",
+                        style: mystyleText(heightsize, 0.025, kBlack, false),
+                      ),
+                      ListView.builder(
+                          itemCount: widget.menuList.length,
+                          padding: EdgeInsets.all(widthsize * 0.04),
+                          physics: const ScrollPhysics(parent: null),
+                          shrinkWrap: true,
+                          itemBuilder: (BuildContext buildList, int index) {
+                            MenuList menu = widget.menuList[index];
+                            return Text(menu.nameMenu,style: mystyleText(heightsize, 0.02, kBlack, false));
+                          })
+                    ],
+                  ),
+                ),
+                SizedBox(
+                  width: widthsize * 0.2,
+                  child: Column(
+                    children: [
+                      Text("จำนวน",
+                          style: mystyleText(heightsize, 0.025, kBlack, false)),
+                      ListView.builder(
+                          itemCount: widget.menuList.length,
+                          padding: EdgeInsets.all(widthsize * 0.04),
+                          physics: const ScrollPhysics(parent: null),
+                          shrinkWrap: true,
+                          itemBuilder: (BuildContext buildList, int index) {
+                            MenuList menu = widget.menuList[index];
+                            return Text(
+                              NumberFormat("#,##0").format(menu.amountmenu),style: mystyleText(heightsize, 0.02, kBlack, false)
+                            );
+                          })
+                    ],
+                  ),
+                ),
+                SizedBox(
+                  width: widthsize * 0.2,
+                  child: Column(
+                    children: [
+                      Text("พอยท์",
+                          style: mystyleText(heightsize, 0.025, kBlack, false)),
+                      ListView.builder(
+                          itemCount: widget.menuList.length,
+                          padding: EdgeInsets.all(widthsize * 0.04),
+                          physics: const ScrollPhysics(parent: null),
+                          shrinkWrap: true,
+                          itemBuilder: (BuildContext buildList, int index) {
+                            MenuList menu = widget.menuList[index];
+                            return Text(
+                                NumberFormat("#,##0").format(menu.receive),style: mystyleText(heightsize, 0.02, kBlack, false));
+                          })
+                    ],
+                  ),
+                )
+              ],
             ),
-            SizedBox(
-              width: widthsize * 0.2,
-              child: Column(
-                children: [
-                  Text("จำนวน",style: mystyleText(heightsize, 0.025, kBlack, false)),
-                  ListView.builder(
-                      itemCount: widget.menuList.length,
-                      padding: EdgeInsets.all(widthsize * 0.04),
-                      physics: const ScrollPhysics(parent: null),
-                      shrinkWrap: true,
-                      itemBuilder: (BuildContext buildList, int index) {
-                        MenuList menu = widget.menuList[index];
-                        return Text(NumberFormat("#,##0").format(menu.receive),);
-                      })
-                ],
+            Positioned(bottom: 0, child: SizedBox(
+              width: widthsize*0.9,
+              child: Center(
+                child: Container(
+                  padding: EdgeInsets.only(right: widthsize*0.04),
+                  width: widthsize * 0.8,
+                  height: heightsize*0.05,
+                  decoration: const BoxDecoration(
+                          border: Border(
+                              top: BorderSide(color: kGray75, width: 2.0))),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text("จำนวนพอยท์ที่ได้",style: mystyleText(heightsize, 0.02, kBlack, false),),
+                      Text("${NumberFormat("#,##0").format(widget.amount)} พอยท์",style: mystyleText(heightsize, 0.02, kBlack, false))
+                    ],
+                  ),
+                ),
               ),
-            ),
-            SizedBox(
-              width: widthsize * 0.2,
-              child: Column(
-                children: [
-                  Text("พอยท์",style: mystyleText(heightsize, 0.025, kBlack, false)),
-                  ListView.builder(
-                      itemCount: widget.menuList.length,
-                      padding: EdgeInsets.all(widthsize * 0.04),
-                      physics: const ScrollPhysics(parent: null),
-                      shrinkWrap: true,
-                      itemBuilder: (BuildContext buildList, int index) {
-                        return Text(widget.amount.toString());
-                      })
-                ],
-              ),
-            )
+            ))
           ],
         ),
       );
 
-  Widget buttonbeta(double heightsize, double widthsize, BuildContext context) =>
+  Widget buttonbeta(
+          double heightsize, double widthsize, BuildContext context) =>
       SizedBox(
         width: widthsize * 0.7,
         height: heightsize * 0.055,

@@ -139,7 +139,7 @@ class _ToStoreState extends State<ToStore> {
               )
             : Image.file(
                 file!,
-                fit: BoxFit.fill,
+                fit: BoxFit.cover,
               ),
       );
 
@@ -161,7 +161,6 @@ class _ToStoreState extends State<ToStore> {
                 builder: (context) => MyMap(geolocation: currentlocation)),
           ).then((value) {
             if (value != null) {
-              print('Returned value from SecondPage: $value');
               setState(() {
                 storeLocation = value;
               });

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 import '../../background.dart/background.dart';
 import '../application/accountService/accountservice.dart';
 import '../background.dart/appstyle.dart';
@@ -146,6 +148,7 @@ class _SettingState extends State<DetailAccount> {
       );
 
   Widget textfieldusername(heightsize, widthsize) => TextFormField(
+        inputFormatters: [LengthLimitingTextInputFormatter(15)],
         controller: _ctrlusername,
         readOnly: !isedit ? true : false,
         style: TextStyle(fontSize: heightsize * 0.02),
@@ -210,7 +213,7 @@ class _SettingState extends State<DetailAccount> {
                       setState(() {
                         selectedDate = dateTime;
                         _ctrldatetime.text =
-                            "${selectedDate.day}/${selectedDate.month}/${selectedDate.year}";
+                            DateFormat('yyyy-MM-dd').format(selectedDate);
                       });
                     }
                   }
@@ -340,23 +343,46 @@ class _SettingState extends State<DetailAccount> {
           onPressed: () {
             if (_formKey.currentState!.validate()) {
               AccountService()
-                  .editpersonal(token, _ctrlusername.text, _ctrluser.text,
-                      _ctrldatetime.text, _ctrlgender.text)
+                  .editpersonal(
+                      token,
+                      _ctrlusername.text,
+                      _ctrluser.text,
+                      DateFormat('yyyy-MM-dd').format(selectedDate),
+                      _ctrlgender.text)
                   .then((value) => {
-                        if(value.code == 200){
-                          setState(() {
-                          isedit = false;
-                          _ctrluser.text = "";
-                          _ctrlusername.text = "";
-                          _ctrldatetime.text = "";
-                          _ctrlgender.text = "";
-                        }),
-                        showAlertBox(context, "แจ้งเตือน", "แก้ไขข้อมูลสำเร็จ")
-                        }
-                        else{
-                          print(value.code),
-                          showAlertBox(context, "แจ้งเตือน", "แก้ไขข้อมูลไม่สำเร็จ")
-                        }
+                        if (value.code == 200)
+                          {
+                            setState(() {
+                              isedit = false;
+                              _ctrluser.text = "";
+                              _ctrlusername.text = "";
+                              _ctrldatetime.text = "";
+                              _ctrlgender.text = "";
+                            }),
+                            showAlertBox(
+                                context, "แจ้งเตือน", "แก้ไขข้อมูลสำเร็จ"),
+                            AccountService()
+                                .apigetpersonal(token)
+                                .then((value) => {
+                                      if (value != null)
+                                        {
+                                          setState(() {
+                                            idname = value.name;
+                                            iduser = value.username;
+                                            birthday = value.birthday;
+                                            sex = value.sex;
+                                            age = value.age;
+                                          })
+                                        }
+                                      else
+                                        {idname = "dont have"}
+                                    })
+                          }
+                        else
+                          {
+                            showAlertBox(
+                                context, "แจ้งเตือน", "แก้ไขข้อมูลไม่สำเร็จ")
+                          }
                       });
             }
           },

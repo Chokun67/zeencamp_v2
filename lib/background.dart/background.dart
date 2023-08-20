@@ -102,6 +102,35 @@ void showAlertBox(BuildContext context, String title, String content) {
   );
 }
 
+void showAlertBox2(BuildContext context, String title, String content,double heightsize) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text(title),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.check_circle_outline_outlined,
+              size: heightsize * 0.2, color: kGreen),
+            Text(content,style: mystyleText(heightsize, 0.05, kGray4A, true)),
+          ],
+        ),
+        actions: <Widget>[
+          ElevatedButton(
+            child: const Text('OK'),
+            onPressed: () {
+              Navigator.of(context).pop();
+              Navigator.of(context).pop();
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      );
+    },
+  );
+}
+
 void showAlertDecide(BuildContext context,
     {String title = '', String content = '', Function? okAction}) {
   showDialog<void>(

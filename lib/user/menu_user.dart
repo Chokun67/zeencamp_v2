@@ -30,8 +30,8 @@ class _MenuUserState extends State<MenuUser> {
   var iduser = "";
   var idname = "";
   var idAccount = "";
-  double geolatitude = 0.0;
-  double geolongitude = 0.0;
+  double geolat = 0.0;
+  double geolon = 0.0;
   List<Allstore> stores = [];
 
   @override
@@ -65,7 +65,7 @@ class _MenuUserState extends State<MenuUser> {
     List widgetOptions = [
       const MenuUser(),
       const TranferPage(),
-      const ShopType(),
+      ShopType(lat: geolat, lon: geolon,),
       QrMenu(idAccount: idAccount)
     ];
     final heightsize = MediaQuery.of(context).size.height -
@@ -73,7 +73,7 @@ class _MenuUserState extends State<MenuUser> {
     final widthsize = MediaQuery.of(context).size.width;
     return FutureBuilder(
         future: getgeoloca().then((value) =>
-            {geolatitude = value.latitude, geolongitude = value.longitude}),
+            {geolat = value.latitude, geolon = value.longitude}),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Mystlye().waitfuture();
@@ -129,10 +129,6 @@ class _MenuUserState extends State<MenuUser> {
                           top: widthsize * 0.02,
                           right: widthsize * 0.04,
                           child: settingButton(heightsize, widthsize)),
-                      Positioned(
-                          top: widthsize * 0.12,
-                          right: widthsize * 0.04,
-                          child: mapButton(heightsize, widthsize)),
                       Positioned(
                           top: widthsize * 0.04,
                           left: widthsize * 0.04,
@@ -198,7 +194,7 @@ class _MenuUserState extends State<MenuUser> {
         child: Container(
           padding: EdgeInsets.all(widthsize * 0.05),
           width: widthsize * 0.8,
-          height: heightsize * 0.185,
+          height: heightsize * 0.2,
           decoration: const BoxDecoration(
             borderRadius: BorderRadius.all(Radius.circular(15)),
             color: kWhite,
@@ -215,36 +211,32 @@ class _MenuUserState extends State<MenuUser> {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                Text("ยอดคงเหลือ",
-                    style:
-                        TextStyle(color: kBlack, fontSize: heightsize * 0.02)),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Text(NumberFormat("#,##0").format(pointid),
-                        style: TextStyle(
-                            color: kGray4A,
-                            fontSize: heightsize * 0.05,
-                            fontWeight: FontWeight.bold)),
-                    SizedBox(width: widthsize * 0.02),
-                    Text("พอยท์",
-                        style: TextStyle(
-                            color: kGray4A,
-                            fontSize: heightsize * 0.02,
-                            fontWeight: FontWeight.bold))
-                  ],
-                )
-              ]),
+              Text("ยอดคงเหลือ",
+                  style:
+                      TextStyle(color: kBlack, fontSize: heightsize * 0.022)),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(NumberFormat("#,##0").format(pointid),
+                      style: TextStyle(
+                          color: kGray4A,
+                          fontSize: heightsize * 0.04,
+                          fontWeight: FontWeight.bold)),
+                  SizedBox(width: widthsize * 0.02),
+                  Text("พอยท์",
+                      style: TextStyle(
+                          color: kGray4A,
+                          fontSize: heightsize * 0.022,
+                          fontWeight: FontWeight.bold))
+                ],
+              ),
               Container(
                   width: widthsize * 0.7,
-                  height: heightsize * 0.035,
+                  height: heightsize * 0.02,
                   decoration: const BoxDecoration(
                       border: Border(
-                          bottom: BorderSide(
-                    color: kGray75,
-                    width: 2.0,
-                  )))),
+                          bottom: BorderSide(color: kGray75, width: 2.0)))),
               Expanded(
                 flex: 1,
                 child: Column(
@@ -301,8 +293,7 @@ class _MenuUserState extends State<MenuUser> {
           ),
         ),
       );
-  double currentLat = 13.7563; // ละติจูดของตำแหน่งปัจจุบัน
-  double currentLon = 100.5018;
+
   Widget adviseShop(widthsize, heightsize) {
     return stores.isNotEmpty
         ? Column(
@@ -318,21 +309,21 @@ class _MenuUserState extends State<MenuUser> {
                   itemBuilder: (context, index) {
                     stores.sort((a, b) {
                       double distanceToA = calculateDistance(
-                          geolatitude,
-                          geolongitude,
+                          geolat,
+                          geolon,
                           extractLoca(a.location, 0),
                           extractLoca(a.location, 1));
                       double distanceToB = calculateDistance(
-                          geolatitude,
-                          geolongitude,
+                          geolat,
+                          geolon,
                           extractLoca(b.location, 0),
                           extractLoca(b.location, 1));
                       return distanceToA.compareTo(distanceToB);
                     });
                     Allstore store = stores[index];
                     double distanceToStore = calculateDistance(
-                        geolatitude,
-                        geolongitude,
+                        geolat,
+                        geolon,
                         extractLoca(store.location, 0),
                         extractLoca(store.location, 1));
                     return Padding(
@@ -345,11 +336,14 @@ class _MenuUserState extends State<MenuUser> {
                               builder: (context) => ShopDetail(
                                 idshop: store.id,
                                 nameshop: store.name,
+                                lat: geolat,
+                                lon: geolon,
                               ),
                             ),
                           );
                         },
                         child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Container(
                               decoration: const BoxDecoration(
@@ -369,7 +363,7 @@ class _MenuUserState extends State<MenuUser> {
                               ),
                             ),
                             Text(
-                              "ร้าน ${store.name}",
+                              " ${store.name}",
                               style: TextStyle(
                                 color: const Color(0xFF4A4A4A),
                                 fontSize: heightsize * 0.016,
@@ -377,7 +371,7 @@ class _MenuUserState extends State<MenuUser> {
                               ),
                             ),
                             Text(
-                              "${distanceToStore.toStringAsFixed(2)} ก.ม.",
+                              " ${distanceToStore.toStringAsFixed(2)} ก.ม.",
                               style: TextStyle(
                                 color: const Color(0xFF4A4A4A),
                                 fontSize: heightsize * 0.016,
@@ -421,7 +415,7 @@ class _MenuUserState extends State<MenuUser> {
               context,
               MaterialPageRoute(
                   builder: (context) =>
-                      MapUser(geolocation: "$geolatitude,$geolongitude")));
+                      MapUser(geolocation: "$geolat,$geolon")));
         },
       );
 }

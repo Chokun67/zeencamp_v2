@@ -115,6 +115,9 @@ class _AddMenuItemState extends State<AddMenuItem> {
   Widget textfieldName(heightsize, widthsize) => SizedBox(
     width: widthsize*0.75,
     child: TextFormField(
+      inputFormatters: [
+    LengthLimitingTextInputFormatter(15), // กำหนดความยาวสูงสุดเป็น 5 ตัวอักษร
+  ],
       style: TextStyle(fontSize: heightsize * 0.02),
       controller: _ctrlname,
       validator: (value) {
@@ -125,7 +128,7 @@ class _AddMenuItemState extends State<AddMenuItem> {
       },
       decoration: InputDecoration(
         hintText: "name : ",
-        fillColor: kGray75,
+        fillColor: kGrayD9,
         filled: true,
         contentPadding: EdgeInsets.symmetric(vertical: heightsize * 0.008),
       ),
@@ -150,7 +153,7 @@ class _AddMenuItemState extends State<AddMenuItem> {
       },
       decoration: InputDecoration(
         hintText: "price : ",
-        fillColor: kGray75,
+        fillColor: kGrayD9,
         filled: true,
         contentPadding: EdgeInsets.symmetric(vertical: heightsize * 0.008),
       ),
@@ -175,7 +178,7 @@ class _AddMenuItemState extends State<AddMenuItem> {
       },
       decoration: InputDecoration(
         hintText: "exchange : ",
-        fillColor: kGray75,
+        fillColor: kGrayD9,
         filled: true,
         contentPadding: EdgeInsets.symmetric(vertical: heightsize * 0.008),
       ),
@@ -186,7 +189,8 @@ class _AddMenuItemState extends State<AddMenuItem> {
     width: widthsize*0.75,
     child: TextFormField(
       keyboardType: TextInputType.number,
-      inputFormatters: [
+       inputFormatters: [
+        FilteringTextInputFormatter.allow(RegExp(r'^\d+')),
         FilteringTextInputFormatter.digitsOnly,
       ],
       style: TextStyle(fontSize: heightsize * 0.02),
@@ -199,7 +203,7 @@ class _AddMenuItemState extends State<AddMenuItem> {
       },
       decoration: InputDecoration(
         hintText: "receive :",
-        fillColor: kGray75,
+        fillColor: kGrayD9,
         filled: true,
         contentPadding: EdgeInsets.symmetric(vertical: heightsize * 0.008),
       ),

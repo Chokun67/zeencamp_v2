@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:zeencamp_v2/background.dart/appstyle.dart';
 
+import '../../application/accountService/accountservice.dart';
 import '../../background.dart/securestorage.dart';
 
 class QrReceive extends StatefulWidget {
-    const QrReceive({Key? key, required this.idshop}) : super(key: key);
+  const QrReceive({Key? key, required this.idshop}) : super(key: key);
   final String idshop;
 
   @override
@@ -15,10 +16,15 @@ class QrReceive extends StatefulWidget {
 class _QrReceiveState extends State<QrReceive> {
   var token = "";
   var idAccount = "";
+  var idname = "";
   @override
   void initState() {
     super.initState();
-    getData();
+    getData().then((value) =>
+        AccountService().apigetpoint(token).then((value) => setState(() {
+              idAccount = value.id;
+              idname = value.name;
+            })));
   }
 
   Future<void> getData() async {
@@ -28,7 +34,7 @@ class _QrReceiveState extends State<QrReceive> {
 
   @override
   Widget build(BuildContext context) {
-    // final heightsize = MediaQuery.of(context).size.height- MediaQuery.of(context).padding.vertical;
+    final heightsize = MediaQuery.of(context).size.height- MediaQuery.of(context).padding.vertical;
     final widthsize = MediaQuery.of(context).size.width;
     return Scaffold(
       appBar: AppBar(
@@ -37,11 +43,20 @@ class _QrReceiveState extends State<QrReceive> {
         foregroundColor: kGray4A,
       ),
       body: Center(
-        child: QrImageView(
-          data: widget.idshop,
-          version: QrVersions.auto,
-          backgroundColor: Colors.white,
-          size: widthsize*0.5,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            QrImageView(
+              data: widget.idshop,
+              version: QrVersions.auto,
+              backgroundColor: Colors.white,
+              size: widthsize * 0.5,
+            ),
+            SizedBox(height: heightsize*0.01),
+            Text("ชื่อ $idname",style: mystyleText(heightsize, 0.03, kGray4A, true)),
+            SizedBox(height: heightsize*0.01),
+            Text("id $idAccount",style: mystyleText(heightsize, 0.03, kGray4A, true)),
+          ],
         ),
       ),
     );

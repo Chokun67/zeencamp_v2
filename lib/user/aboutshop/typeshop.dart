@@ -8,9 +8,14 @@ import '../../background.dart/appstyle.dart';
 import '../../background.dart/background.dart';
 import '../../background.dart/securestorage.dart';
 import '../../domain/dmstore/allstore.dart';
+import '../../shop/map/mapuser.dart';
 
 class ShopType extends StatefulWidget {
-  const ShopType({super.key});
+  const ShopType({Key? key, required this.lat, required this.lon})
+      : super(key: key);
+
+  final double lat;
+  final double lon;
 
   @override
   State<ShopType> createState() => _ShopTypeState();
@@ -63,7 +68,7 @@ class _ShopTypeState extends State<ShopType> {
               widthsize,
               heightsize - MediaQuery.of(context).padding.vertical,
               context,
-              "ร้านนค้า",
+              "ร้านค้า",
               true,
               0.2),
           Padding(
@@ -93,6 +98,10 @@ class _ShopTypeState extends State<ShopType> {
               ],
             ),
           ),
+          Positioned(
+              top: widthsize * 0.04,
+              right: widthsize * 0.04,
+              child: mapButton(heightsize, widthsize)),
         ]),
       )),
     );
@@ -127,21 +136,21 @@ class _ShopTypeState extends State<ShopType> {
                   itemBuilder: (context, index) {
                     stores.sort((a, b) {
                       double distanceToA = calculateDistance(
-                          currentLat,
-                          currentLon,
+                          widget.lat,
+                          widget.lon,
                           extractLoca(a.location, 0),
                           extractLoca(a.location, 1));
                       double distanceToB = calculateDistance(
-                          currentLat,
-                          currentLon,
+                          widget.lat,
+                          widget.lon,
                           extractLoca(b.location, 0),
                           extractLoca(b.location, 1));
                       return distanceToA.compareTo(distanceToB);
                     });
                     Allstore store = stores[index];
                     double distanceToStore = calculateDistance(
-                        currentLat,
-                        currentLon,
+                        widget.lat,
+                        widget.lon,
                         extractLoca(store.location, 0),
                         extractLoca(store.location, 1));
                     return Padding(
@@ -154,11 +163,14 @@ class _ShopTypeState extends State<ShopType> {
                               builder: (context) => ShopDetail(
                                 idshop: store.id,
                                 nameshop: store.name,
+                                lat: widget.lat,
+                                lon: widget.lon,
                               ),
                             ),
                           );
                         },
                         child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Container(
                               decoration: const BoxDecoration(
@@ -178,7 +190,7 @@ class _ShopTypeState extends State<ShopType> {
                               ),
                             ),
                             Text(
-                              "ร้าน ${store.name}",
+                              " ${store.name}",
                               style: TextStyle(
                                 color: const Color(0xFF4A4A4A),
                                 fontSize: heightsize * 0.016,
@@ -186,7 +198,7 @@ class _ShopTypeState extends State<ShopType> {
                               ),
                             ),
                             Text(
-                              "${distanceToStore.toStringAsFixed(2)} ก.ม.",
+                              " ${distanceToStore.toStringAsFixed(2)} ก.ม.",
                               style: TextStyle(
                                 color: const Color(0xFF4A4A4A),
                                 fontSize: heightsize * 0.016,
@@ -219,7 +231,7 @@ class _ShopTypeState extends State<ShopType> {
                         context,
                         MaterialPageRoute(
                             builder: (context) =>
-                                SearchShop(category: number)));
+                                SearchShop(category: number,lat: widget.lat,lon: widget.lon,)));
                   },
                   icon: const Icon(Icons.arrow_circle_right),
                   iconSize: heightsize * 0.07)
@@ -250,6 +262,8 @@ class _ShopTypeState extends State<ShopType> {
                         builder: (context) => ShopDetail(
                               idshop: stores2[index].id,
                               nameshop: stores2[index].name,
+                              lat: widget.lat,
+                                lon: widget.lon,
                             )))
               },
               child: Column(
@@ -284,4 +298,15 @@ class _ShopTypeState extends State<ShopType> {
       ),
     );
   }
+
+  Widget mapButton(widthsize, heightsize) => IconButton(
+        icon: Icon(Icons.map_sharp, size: widthsize * 0.055),
+        onPressed: () {
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) =>
+                      MapUser(geolocation: "${widget.lat},${widget.lon}")));
+        },
+      );
 }

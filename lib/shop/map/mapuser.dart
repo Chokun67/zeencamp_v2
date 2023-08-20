@@ -77,8 +77,9 @@ class MapUserState extends State<MapUser> {
                 Flexible(
                   child: FlutterMap(
                     options: MapOptions(
-                      // center: LatLng(13.83448,100.6450688), 
-                      center: LatLng(extractLoca(widget.geolocation, 0),extractLoca(widget.geolocation, 1)),
+                      // center: LatLng(13.83448,100.6450688),
+                      center: LatLng(extractLoca(widget.geolocation, 0),
+                          extractLoca(widget.geolocation, 1)),
                       zoom: 15,
                       // onTap: (_, p) => setState(() => {
                       //       debugPrint('debug: $p'),
@@ -101,28 +102,37 @@ class MapUserState extends State<MapUser> {
                         markers: [
                           // buildPin(
                           //     LatLng(extractLoca(b, 0), extractLoca(b, 1))),
-                          Marker(
-                            point: const LatLng(13.83448, 100.650689),
-                            rotate: false,
-                            builder: (context) => const Icon(Icons.location_pin, size: 60),
-                            
-                          ),
+                          // Marker(
+                          //   point: const LatLng(13.83448, 100.650689),
+                          //   rotate: false,
+                          //   builder: (context) => const Icon(Icons.location_pin, size: 60)),
                           for (var stores in stores)
                             Marker(
+                              width: 120,
+                              height: 100,
                               point: LatLng(extractLoca(stores.location, 0),
                                   extractLoca(stores.location, 1)),
                               rotate: false,
-                              builder: (context) => GestureDetector (
+                              builder: (context) => GestureDetector(
                                   onTap: () {
-                                    Navigator.pushReplacement(
+                                    Navigator.push(
                                         context,
                                         MaterialPageRoute(
                                             builder: (context) => ShopDetail(
-                                                idshop: stores.id,
-                                                nameshop: stores.name)));
+                                                  idshop: stores.id,
+                                                  nameshop: stores.name,
+                                                  lat: extractLoca(
+                                                      stores.location, 0),
+                                                  lon: extractLoca(
+                                                      stores.location, 1),
+                                                )));
                                   },
-                                  child:
-                                      const Icon(Icons.location_pin, size: 60)),
+                                  child: Column(
+                                    children: [
+                                      const Icon(Icons.location_pin, size: 60),
+                                      Text(stores.name)
+                                    ],
+                                  )),
                             )
                         ],
                       ),

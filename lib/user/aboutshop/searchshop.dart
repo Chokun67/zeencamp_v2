@@ -8,11 +8,12 @@ import '../../background.dart/securestorage.dart';
 import '../../domain/dmstore/allstore.dart';
 
 class SearchShop extends StatefulWidget {
-  const SearchShop({
-    Key? key,
-    required this.category,
-  }) : super(key: key);
+  const SearchShop(
+      {Key? key, required this.category, required this.lat, required this.lon})
+      : super(key: key);
   final int category;
+  final double lat;
+  final double lon;
 
   @override
   State<SearchShop> createState() => _SearchShopState();
@@ -64,10 +65,15 @@ class _SearchShopState extends State<SearchShop> {
       backgroundColor: kWhiteF32,
       body: SafeArea(
           child: SingleChildScrollView(
-            child: Stack(children: [
-                  Mystlye().buildBackground(
-              widthsize, heightsize- MediaQuery.of(context).padding.vertical, context, "ร้านค้า", true, 0.26),
-                  Padding(
+        child: Stack(children: [
+          Mystlye().buildBackground(
+              widthsize,
+              heightsize - MediaQuery.of(context).padding.vertical,
+              context,
+              "ร้านค้า",
+              true,
+              0.26),
+          Padding(
             padding: EdgeInsets.all(widthsize * 0.03),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -76,14 +82,14 @@ class _SearchShopState extends State<SearchShop> {
                 allShop(widthsize, heightsize)
               ],
             ),
-                  ),
-                  Positioned(
+          ),
+          Positioned(
               top: heightsize * 0.15,
               child: SizedBox(
                   width: widthsize,
                   child: Center(child: fieldSearchType(widthsize, heightsize))))
-                ]),
-          )),
+        ]),
+      )),
     );
   }
 
@@ -102,6 +108,19 @@ class _SearchShopState extends State<SearchShop> {
             itemBuilder: (BuildContext context, int index) {
               List<Allstore> displayList =
                   _ctrlSearch.text.isEmpty ? stores : filteredList;
+              stores.sort((a, b) {
+                double distanceToA = calculateDistance(widget.lat, widget.lon,
+                    extractLoca(a.location, 0), extractLoca(a.location, 1));
+                double distanceToB = calculateDistance(widget.lat, widget.lon,
+                    extractLoca(b.location, 0), extractLoca(b.location, 1));
+                return distanceToA.compareTo(distanceToB);
+              });
+              Allstore store = stores[index];
+              double distanceToStore = calculateDistance(
+                  widget.lat,
+                  widget.lon,
+                  extractLoca(store.location, 0),
+                  extractLoca(store.location, 1));
               return InkWell(
                 onTap: () => {
                   Navigator.push(
@@ -110,11 +129,14 @@ class _SearchShopState extends State<SearchShop> {
                           builder: (context) => ShopDetail(
                                 idshop: displayList[index].id,
                                 nameshop: displayList[index].name,
+                                lat: widget.lat,
+                                lon: widget.lon,
                               )))
                 },
                 child: Container(
                   margin: const EdgeInsets.all(8.0),
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       displayList[index].storePicture.isNotEmpty
                           ? Container(
@@ -137,10 +159,10 @@ class _SearchShopState extends State<SearchShop> {
                               height: heightsize * 0.14,
                               width: widthsize * 0.44,
                               color: Colors.green),
-                      Text("ร้าน ${displayList[index].name}",
+                      Text(" ${displayList[index].name}",
                           style: mystyleText(heightsize, 0.02, kGray4A, false)),
                       Text(
-                        "id ${displayList[index].id}",
+                        " ${distanceToStore.toStringAsFixed(2)} ก.ม.",
                         style: mystyleText(heightsize, 0.02, kGray4A, false),
                       ),
                     ],
@@ -165,7 +187,9 @@ class _SearchShopState extends State<SearchShop> {
                   borderRadius: BorderRadius.circular(10)),
               fillColor: const Color(0xFFFFFFFF),
               filled: true,
-              hintText: "search"),
+              prefixIcon: const Icon(Icons.search),
+              hintText: "ค้นหา",
+              hintStyle: mystyleText(heightsize, 0.02, kGray4A, false)),
         ),
       );
 }

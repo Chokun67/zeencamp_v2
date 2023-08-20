@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:zeencamp_v2/setting/setting.dart';
+import 'package:zeencamp_v2/shop/report.dart';
 import 'package:zeencamp_v2/shop/tranferbill/billchoice.dart';
 import 'package:zeencamp_v2/shop/detail/detailstore.dart';
 import '../Authentication/login.dart';
@@ -28,7 +29,7 @@ class _MenuShopState extends State<MenuShop> {
   @override
   void initState() {
     super.initState();
-      getData();
+    getData();
   }
 
   Future<void> getData() async {
@@ -133,30 +134,29 @@ class _MenuShopState extends State<MenuShop> {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                Text("ยอดคงเหลือ",
-                    style:
-                        TextStyle(color: kBlack, fontSize: heightsize * 0.022)),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Text(NumberFormat("#,##0").format(pointid),
-                        style: TextStyle(
-                            color: kGray4A,
-                            fontSize: heightsize * 0.05,
-                            fontWeight: FontWeight.bold)),
-                    SizedBox(width: widthsize * 0.02),
-                    Text("พอยท์",
-                        style: TextStyle(
-                            color: kGray4A,
-                            fontSize: heightsize * 0.022,
-                            fontWeight: FontWeight.bold))
-                  ],
-                )
-              ]),
+              Text("ยอดคงเหลือ",
+                  style:
+                      TextStyle(color: kBlack, fontSize: heightsize * 0.022)),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(NumberFormat("#,##0").format(pointid),
+                      style: TextStyle(
+                          color: kGray4A,
+                          fontSize: heightsize * 0.04,
+                          fontWeight: FontWeight.bold)),
+                  SizedBox(width: widthsize * 0.02),
+                  Text("พอยท์",
+                      style: TextStyle(
+                          color: kGray4A,
+                          fontSize: heightsize * 0.022,
+                          fontWeight: FontWeight.bold))
+                ],
+              ),
               Container(
                   width: widthsize * 0.7,
-                  height: heightsize * 0.04,
+                  height: heightsize * 0.02,
                   decoration: const BoxDecoration(
                       border: Border(
                           bottom: BorderSide(color: kGray75, width: 2.0)))),
@@ -167,7 +167,7 @@ class _MenuShopState extends State<MenuShop> {
                   children: [
                     Text('รายละเอียดเพิ่มเติม',
                         style: TextStyle(
-                            fontSize: heightsize * 0.022,
+                            fontSize: heightsize * 0.02,
                             fontWeight: FontWeight.w500)),
                   ],
                 ),
@@ -177,30 +177,36 @@ class _MenuShopState extends State<MenuShop> {
         ),
       );
 
-  Widget checkData(widthsize, heightsize) => Container(
-        width: widthsize * 0.8,
-        height: heightsize * 0.14,
-        decoration: const BoxDecoration(
-            borderRadius: BorderRadius.all(Radius.circular(15)),
-            color: kWhite,
-            boxShadow: [
-              BoxShadow(
-                  color: Colors.grey,
-                  spreadRadius: 0.5,
-                  blurRadius: 4, // รัศมีการเบลอของเงา
-                  offset: Offset(0, 5) // ตำแหน่งเงาแนวนอนและแนวตั้ง
-                  )
-            ]),
-        child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-          Icon(
-            Icons.auto_graph_sharp,
-            size: heightsize * 0.075,
-          ),
-          Text(
-            "ข้อมูล",
-            style: mystyleText(heightsize, 0.028, kGray4A, true),
-          )
-        ]),
+  Widget checkData(widthsize, heightsize) => InkWell(
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const Report()),
+        ),
+        child: Container(
+          width: widthsize * 0.8,
+          height: heightsize * 0.14,
+          decoration: const BoxDecoration(
+              borderRadius: BorderRadius.all(Radius.circular(15)),
+              color: kWhite,
+              boxShadow: [
+                BoxShadow(
+                    color: Colors.grey,
+                    spreadRadius: 0.5,
+                    blurRadius: 4, // รัศมีการเบลอของเงา
+                    offset: Offset(0, 5) // ตำแหน่งเงาแนวนอนและแนวตั้ง
+                    )
+              ]),
+          child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+            Icon(
+              Icons.auto_graph_sharp,
+              size: heightsize * 0.075,
+            ),
+            Text(
+              "ข้อมูล",
+              style: mystyleText(heightsize, 0.028, kGray4A, true),
+            )
+          ]),
+        ),
       );
 
   Widget fourmenustore(widthsize, heightsize) => SizedBox(
